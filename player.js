@@ -1,3 +1,5 @@
+import { Sitting, Running } from "./playerStates.js";
+
 export class Player {
   constructor(game) {
     this.game = game;
@@ -7,11 +9,17 @@ export class Player {
     this.y = this.game.height - this.height;
     this.vy = 0;
     this.image = document.getElementById("player");
+    this.frameX = 0;
+    this.frameY = 0;
     this.speed = 0;
     this.maxSpeed = 10;
     this.weight = 1;
+    this.states = [new Sitting(this), new Running(this)];
+    this.currentState = this.states[0];
+    this.currentState.enter();
   }
   update(input) {
+    this.currentState.handleInput(input);
     // horizontal movement
     this.x += this.speed;
     if (input.includes("ArrowRight")) this.speed = this.maxSpeed;
@@ -29,8 +37,8 @@ export class Player {
   draw(context) {
     context.drawImage(
       this.image,
-      0,
-      0,
+      this.frameX * this.width,
+      this.frameY * this.height,
       this.width,
       this.height,
       this.x,
@@ -41,5 +49,9 @@ export class Player {
   }
   onGround() {
     return this.y >= this.game.height - this.height;
+  }
+  setState(state) {
+    this.currentState = this.states[state];
+    this.currentState.enter();
   }
 }
