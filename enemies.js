@@ -189,36 +189,36 @@ export class HandEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    // sheet 446x80 → 5 frames (approx 89px each)
-    this.spriteWidth = 89;
-    this.spriteHeight = 80;
-    this.width = 75;
-    this.height = 67;
+    this.image = document.getElementById("enemy_hand");
+    // sheet 446x80 — 5 frames
+    this.maxFrame = 4;
+    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 89;
+    this.spriteHeight = this.image.naturalHeight || 80;
+    this.width = this.spriteWidth * 0.85;
+    this.height = this.spriteHeight * 0.85;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = 0;
     this.speedY = 0;
-    this.maxFrame = 4;
-    this.image = document.getElementById("enemy_hand");
   }
 }
 
 // ==================== FOREST FLYING ====================
-// ghost_4 sheet 361x70 → treat as 5 frames of 72
+// ghost_4 sheet 361x70
 export class Ghost4Enemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 72;
-    this.spriteHeight = 70;
-    this.width = 80;
-    this.height = 78;
+    this.image = document.getElementById("enemy_ghost_4");
+    this.maxFrame = 4;
+    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 72;
+    this.spriteHeight = this.image.naturalHeight || 70;
+    this.width = this.spriteWidth;
+    this.height = this.spriteHeight;
     this.x = this.game.width;
-    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.2;
+    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.15;
     this.speedX = Math.random() * 1.2 + 0.8;
     this.speedY = 0;
-    this.maxFrame = 4;
-    this.image = document.getElementById("enemy_ghost_4");
     this.angle = 0;
     this.curve = Math.random() * 2 + 1.5;
   }
@@ -235,16 +235,16 @@ export class Ghost4Enemy extends Enemy {
   }
 }
 
-// ghost_3 sheet 524x70 → 4 frames × 131
+// ghost_3 sheet 524x70 — 4 frames × 131
 export class Ghost3Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
-    this.spriteWidth = 131;
-    this.spriteHeight = 70;
-    this.width = 100;
-    this.height = 70;
-    this.maxFrame = 3;
     this.image = document.getElementById("enemy_ghost_3");
+    this.maxFrame = 3;
+    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 131;
+    this.spriteHeight = this.image.naturalHeight || 70;
+    this.width = this.spriteWidth * 0.75;
+    this.height = this.spriteHeight;
   }
 }
 

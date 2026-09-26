@@ -149,7 +149,7 @@ window.addEventListener("load", () => {
       this.score = 0;
       this.time = 0;
       // Fewer enemies than before
-      this.enemyInterval = 1600;
+      this.enemyInterval = 1100;
       this.paused = false;
       this.waitingForLevelChoice = false;
 
@@ -187,12 +187,26 @@ window.addEventListener("load", () => {
           SpinnerEnemy,
         ];
 
-        // Only sometimes spawn a ground enemy, always one flying (but slower interval)
-        if (Math.random() < 0.4) {
+        const r = Math.random();
+        if (r < 0.15) {
+          // small group of zombies
+          this.enemies.push(new ZombieEnemy(this));
+          this.enemies.push(new ZombieEnemy(this));
+        } else if (r < 0.28) {
+          // small group of spinners
+          this.enemies.push(new SpinnerEnemy(this));
+          this.enemies.push(new SpinnerEnemy(this));
+        } else if (r < 0.55) {
           const GroundClass =
             groundTypes[Math.floor(Math.random() * groundTypes.length)];
           this.enemies.push(new GroundClass(this));
         } else {
+          const FlyingClass =
+            flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
+          this.enemies.push(new FlyingClass(this));
+        }
+        // often also one extra flying enemy
+        if (Math.random() < 0.45) {
           const FlyingClass =
             flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
           this.enemies.push(new FlyingClass(this));

@@ -67,7 +67,16 @@ export class Jumping extends State {
     super("JUMPING", game);
   }
   enter() {
-    if (this.game.player.onGround()) this.game.player.vy -= 42;
+    if (this.game.player.onGround()) {
+      // Jump high enough to reach top enemies, but stay just below screen top
+      const available =
+        this.game.height -
+        this.game.groundMargin -
+        this.game.player.height -
+        30;
+      const jumpV = Math.sqrt(2 * this.game.player.weight * available * 0.92);
+      this.game.player.vy -= jumpV;
+    }
     this.game.player.frameX = 0;
     this.game.player.maxFrame = 6;
     this.game.player.frameY = 1;
@@ -127,7 +136,15 @@ export class Rolling extends State {
       input.includes("ArrowUp") &&
       this.game.player.onGround()
     ) {
-      this.game.player.vy -= 42;
+      {
+        const available =
+          this.game.height -
+          this.game.groundMargin -
+          this.game.player.height -
+          30;
+        const jumpV = Math.sqrt(2 * this.game.player.weight * available * 0.92);
+        this.game.player.vy -= jumpV;
+      }
     } else if (input.includes("ArrowDown") && !this.game.player.onGround()) {
       this.game.player.setState(states.DIVING, 0);
     }

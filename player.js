@@ -61,10 +61,10 @@ export class Player {
     if (!this.onGround()) this.vy += this.weight;
     else this.vy = 0;
 
-    // keep player on screen
+    // Soft top limit: stay on screen, no bounce
     if (this.y < 0) {
       this.y = 0;
-      this.vy = 0;
+      if (this.vy < 0) this.vy = 0; // only stop upward motion once
     }
     if (this.y > this.game.height - this.height - this.game.groundMargin) {
       this.y = this.game.height - this.height - this.game.groundMargin;
