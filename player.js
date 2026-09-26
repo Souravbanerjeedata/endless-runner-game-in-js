@@ -7,6 +7,8 @@ import {
   Diving,
   Hit,
 } from "./playerStates.js";
+import { CollisionAnimation } from "./collisionAnimation.js";
+import { FloatingMessages } from "./floatingMessages.js";
 
 export class Player {
   constructor(game) {
@@ -39,16 +41,17 @@ export class Player {
   }
 
   update(input, deltaTime) {
-    this.checkCollision();
+    this.checkCollison();
     this.currentState.handleInput(input);
 
-    // horizontal movement
+    // horizontal movement – blocked during Hit (state 6)
     this.x += this.speed;
-    if (input.includes("ArrowRight")) this.speed = this.maxSpeed;
-    else if (input.includes("ArrowLeft")) this.speed = -this.maxSpeed;
+    if (input.includes("ArrowRight") && this.currentState !== this.states[6])
+      this.speed = this.maxSpeed;
+    else if (input.includes("ArrowLeft") && this.currentState !== this.states[6])
+      this.speed = -this.maxSpeed;
     else this.speed = 0;
 
-    // boundaries
     if (this.x < 0) this.x = 0;
     else if (this.x > this.game.width - this.width)
       this.x = this.game.width - this.width;
@@ -57,6 +60,15 @@ export class Player {
     this.y += this.vy;
     if (!this.onGround()) this.vy += this.weight;
     else this.vy = 0;
+
+    // keep player on screen
+    if (this.y < 0) {
+      this.y = 0;
+      this.vy = 0;
+    }
+    if (this.y > this.game.height - this.height - this.game.groundMargin) {
+      this.y = this.game.height - this.height - this.game.groundMargin;
+    }
 
     // sprite animation
     if (this.frameTimer > this.frameInterval) {
@@ -94,7 +106,8 @@ export class Player {
     this.currentState.enter();
   }
 
-  checkCollision() {
+  // YOUR original collision logic restored
+  checkCollison() {
     this.game.enemies.forEach((enemy) => {
       if (
         enemy.x < this.x + this.width &&
@@ -102,10 +115,30 @@ export class Player {
         enemy.y < this.y + this.height &&
         enemy.y + enemy.height > this.y
       ) {
-        // Collision detected
         enemy.markedForDeletion = true;
-        this.game.score++;
-        // You can later add: this.game.lives--; and Hit state
+        this.game.collisions.push(
+          new CollisionAnimation(
+            this.game,
+            enemy.x + enemy.width * 0.5,
+            enemy.y + enemy.height * 0.5,
+          ),
+        );
+        // Rolling (4) or Diving (5) → score + floating +1
+        if (
+          this.currentState === this.states[4] ||
+          this.currentState === this.states[5]
+        ) {
+          this.game.score++;
+          this.game.floatingMessages.push(
+            new FloatingMessages("+1", enemy.x, enemy.y, 150, 50),
+          );
+        } else {
+          // Not spinning → Hit state, lose score & life
+          this.setState(6, 0);
+          this.game.score -= 5;
+          this.game.lives--;
+          if (this.game.lives <= 0) this.game.gameOver = true;
+        }
       }
     });
   }

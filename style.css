@@ -10,6 +10,7 @@ body {
   height: 100%;
   overflow: hidden;
   background: #000;
+  font-family: "Creepster", cursive;
 }
 
 #canvas1 {
@@ -23,33 +24,91 @@ body {
 
 /* Hide all images used as sprite sources */
 #player,
-#layer1,
-#layer2,
-#layer3,
-#layer4,
-#layer5,
-#forest-layer1,
-#forest-layer2,
-#forest-layer3,
-#forest-layer4,
-#forest-layer5,
-#enemy_fly,
-#enemy_plant,
-#enemy_spider_big,
-#enemy_digger,
-#enemy_ground_zombie,
-#enemy_zombie,
-#enemy_worm,
-#enemy_hand,
-#enemy_ghost_4,
-#enemy_ghost_3,
-#enemy_ghost_2,
-#enemy_bat_3,
-#enemy_raven,
-#enemy_spider,
-#enemy_spinner,
-#fire,
-#collisionAnimation,
-#lives {
+#layer1, #layer2, #layer3, #layer4, #layer5,
+#forest-layer1, #forest-layer2, #forest-layer3, #forest-layer4, #forest-layer5,
+#enemy_fly, #enemy_plant, #enemy_spider_big,
+#enemy_digger, #enemy_ground_zombie, #enemy_zombie, #enemy_worm, #enemy_hand,
+#enemy_ghost_4, #enemy_ghost_3, #enemy_ghost_2, #enemy_bat_3, #enemy_raven,
+#enemy_spider, #enemy_spinner,
+#fire, #collisionAnimation, #lives {
   display: none;
+}
+
+/* Level transition modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  color: #eee;
+  padding: 40px 50px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  border: 3px solid #e94560;
+  max-width: 90%;
+}
+
+.modal-content h1 {
+  font-size: 3rem;
+  color: #e94560;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.modal-content p {
+  font-size: 1.4rem;
+  margin: 8px 0;
+}
+
+.modal-buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-buttons button {
+  font-family: "Creepster", cursive;
+  font-size: 1.3rem;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+#btnContinue {
+  background: #e94560;
+  color: white;
+}
+
+#btnContinue:hover {
+  background: #ff6b81;
+  transform: scale(1.05);
+}
+
+#btnQuit {
+  background: #444;
+  color: #ddd;
+}
+
+#btnQuit:hover {
+  background: #666;
+  transform: scale(1.05);
 }

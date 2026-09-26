@@ -21,12 +21,14 @@ class Enemy {
   }
   draw(context) {
     if (this.game.debug) {
+      context.strokeStyle = "red";
+      context.lineWidth = 2;
       context.strokeRect(this.x, this.y, this.width, this.height);
     }
     context.drawImage(
       this.image,
       this.frameX * this.spriteWidth,
-      this.frameY * this.spriteHeight,
+      0,
       this.spriteWidth,
       this.spriteHeight,
       this.x,
@@ -37,17 +39,17 @@ class Enemy {
   }
 }
 
-// ==================== CITY ENEMIES ====================
+// ==================== CITY ====================
 export class FlyingEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
     this.spriteWidth = 60;
     this.spriteHeight = 44;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.width = 60;
+    this.height = 44;
     this.x = this.game.width + Math.random() * this.game.width * 0.5;
-    this.y = Math.random() * this.game.height * 0.5;
+    this.y = Math.random() * this.game.height * 0.45;
     this.speedX = Math.random() + 1;
     this.speedY = 0;
     this.maxFrame = 5;
@@ -68,8 +70,8 @@ export class GroundEnemy extends Enemy {
     this.game = game;
     this.spriteWidth = 60;
     this.spriteHeight = 87;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.width = 60;
+    this.height = 87;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = 0;
@@ -85,8 +87,8 @@ export class ClimbingEnemy extends Enemy {
     this.game = game;
     this.spriteWidth = 120;
     this.spriteHeight = 144;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.width = 120;
+    this.height = 144;
     this.x = this.game.width;
     this.y = Math.random() * this.game.height * 0.5;
     this.speedX = 0;
@@ -109,32 +111,34 @@ export class ClimbingEnemy extends Enemy {
   }
 }
 
-// ==================== FOREST GROUND ENEMIES ====================
+// ==================== FOREST GROUND ====================
+// digger sheet 2080x178 → 8 frames × 260
 export class DiggerEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 180;
-    this.spriteHeight = 140;
-    this.width = this.spriteWidth * 0.55;
-    this.height = this.spriteHeight * 0.55;
+    this.spriteWidth = 260;
+    this.spriteHeight = 178;
+    this.width = 95;
+    this.height = 65;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = Math.random() * 0.5 + 0.4;
     this.speedY = 0;
-    this.maxFrame = 5;
+    this.maxFrame = 7;
     this.image = document.getElementById("enemy_digger");
   }
 }
 
+// ground_zombie 961x90 → ~8 frames × 120
 export class GroundZombieEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 160;
-    this.spriteHeight = 140;
-    this.width = this.spriteWidth * 0.5;
-    this.height = this.spriteHeight * 0.5;
+    this.spriteWidth = 120;
+    this.spriteHeight = 90;
+    this.width = 85;
+    this.height = 64;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = Math.random() * 0.4 + 0.3;
@@ -144,14 +148,15 @@ export class GroundZombieEnemy extends Enemy {
   }
 }
 
+// zombie 2336x410 → 8 frames × 292
 export class ZombieEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 120;
-    this.spriteHeight = 140;
-    this.width = this.spriteWidth * 0.55;
-    this.height = this.spriteHeight * 0.55;
+    this.spriteWidth = 292;
+    this.spriteHeight = 410;
+    this.width = 70;
+    this.height = 98;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = Math.random() * 0.6 + 0.4;
@@ -161,14 +166,15 @@ export class ZombieEnemy extends Enemy {
   }
 }
 
+// worm 482x60 → 6 frames × 80
 export class WormEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 229;
-    this.spriteHeight = 171;
-    this.width = this.spriteWidth * 0.45;
-    this.height = this.spriteHeight * 0.45;
+    this.spriteWidth = 80;
+    this.spriteHeight = 60;
+    this.width = 80;
+    this.height = 60;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = Math.random() * 0.3 + 0.2;
@@ -178,40 +184,42 @@ export class WormEnemy extends Enemy {
   }
 }
 
+// hand 446x80 → 5 frames × 89
 export class HandEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 100;
-    this.spriteHeight = 90;
-    this.width = this.spriteWidth * 0.65;
-    this.height = this.spriteHeight * 0.65;
+    this.spriteWidth = 89;
+    this.spriteHeight = 80;
+    this.width = 70;
+    this.height = 63;
     this.x = this.game.width;
-    this.y = this.game.height - this.height - this.game.groundMargin + 8;
+    this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = 0;
     this.speedY = 0;
-    this.maxFrame = 5;
+    this.maxFrame = 4;
     this.image = document.getElementById("enemy_hand");
   }
 }
 
-// ==================== FOREST FLYING / SPECIAL ENEMIES ====================
+// ==================== FOREST FLYING ====================
+// ghost_4 361x70 → 5 frames × 72
 export class Ghost4Enemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 80;
-    this.spriteHeight = 90;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.spriteWidth = 72;
+    this.spriteHeight = 70;
+    this.width = 72;
+    this.height = 70;
     this.x = this.game.width;
-    this.y = Math.random() * this.game.height * 0.5;
-    this.speedX = Math.random() * 1.5 + 1;
+    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.2;
+    this.speedX = Math.random() * 1.2 + 0.8;
     this.speedY = 0;
-    this.maxFrame = 5;
+    this.maxFrame = 4;
     this.image = document.getElementById("enemy_ghost_4");
     this.angle = 0;
-    this.curve = Math.random() * 3 + 2;
+    this.curve = Math.random() * 2 + 1.5;
   }
   update(deltaTime) {
     super.update(deltaTime);
@@ -220,69 +228,75 @@ export class Ghost4Enemy extends Enemy {
   }
   draw(context) {
     context.save();
-    context.globalAlpha = 0.75;
+    context.globalAlpha = 0.85;
     super.draw(context);
     context.restore();
   }
 }
 
+// ghost_3 524x70 → 4 frames × 131
 export class Ghost3Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
-    this.spriteWidth = 70;
-    this.spriteHeight = 80;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.spriteWidth = 131;
+    this.spriteHeight = 70;
+    this.width = 80;
+    this.height = 70;
+    this.maxFrame = 3;
     this.image = document.getElementById("enemy_ghost_3");
   }
 }
 
+// ghost_2 160x89 → 2 frames × 80
 export class Ghost2Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
-    this.spriteWidth = 60;
-    this.spriteHeight = 70;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.spriteWidth = 80;
+    this.spriteHeight = 89;
+    this.width = 80;
+    this.height = 89;
+    this.maxFrame = 1;
     this.image = document.getElementById("enemy_ghost_2");
   }
 }
 
+// bat_3 1596x188 → 6 frames × 266
 export class Bat3Enemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 80;
-    this.spriteHeight = 60;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.spriteWidth = 266;
+    this.spriteHeight = 188;
+    this.width = 90;
+    this.height = 64;
     this.x = this.game.width + Math.random() * this.game.width * 0.3;
-    this.y = Math.random() * this.game.height * 0.4;
-    this.speedX = Math.random() * 2 + 1.5;
+    this.y = Math.random() * this.game.height * 0.3 + this.game.height * 0.18;
+    this.speedX = Math.random() * 1.8 + 1.2;
     this.speedY = 0;
     this.maxFrame = 5;
     this.image = document.getElementById("enemy_bat_3");
     this.angle = 0;
-    this.va = Math.random() * 0.15 + 0.1;
+    this.va = Math.random() * 0.12 + 0.08;
   }
   update(deltaTime) {
     super.update(deltaTime);
     this.angle += this.va;
-    this.y += Math.sin(this.angle) * 2;
+    this.y += Math.sin(this.angle) * 2.2;
   }
 }
 
+// raven 1626x194 → 6 frames × 271
 export class RavenEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 100;
-    this.spriteHeight = 70;
-    this.width = this.spriteWidth * 0.8;
-    this.height = this.spriteHeight * 0.8;
+    this.spriteWidth = 271;
+    this.spriteHeight = 194;
+    this.width = 95;
+    this.height = 68;
     this.x = this.game.width;
-    this.y = Math.random() * this.game.height * 0.4;
-    this.speedX = Math.random() * 2 + 2;
+    this.y = Math.random() * this.game.height * 0.3 + this.game.height * 0.18;
+    this.speedX = Math.random() * 1.8 + 1.5;
     this.speedY = 0;
     this.maxFrame = 5;
     this.image = document.getElementById("enemy_raven");
@@ -290,26 +304,27 @@ export class RavenEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
-    this.angle += 0.08;
-    this.y += Math.sin(this.angle) * 1.5;
+    this.angle += 0.07;
+    this.y += Math.sin(this.angle) * 1.6;
   }
 }
 
+// spider 1860x175 → 6 frames × 310
 export class SpiderEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
     this.spriteWidth = 310;
     this.spriteHeight = 175;
-    this.width = this.spriteWidth * 0.35;
-    this.height = this.spriteHeight * 0.35;
-    this.x = Math.random() * this.game.width * 0.7 + this.game.width * 0.2;
+    this.width = 100;
+    this.height = 56;
+    this.x = Math.random() * this.game.width * 0.5 + this.game.width * 0.3;
     this.y = 0 - this.height;
     this.speedX = 0;
-    this.speedY = Math.random() * 0.5 + 0.3;
+    this.speedY = Math.random() * 0.5 + 0.35;
     this.maxFrame = 5;
     this.image = document.getElementById("enemy_spider");
-    this.maxLength = Math.random() * this.game.height * 0.55 + 80;
+    this.maxLength = Math.random() * this.game.height * 0.4 + this.game.height * 0.2;
   }
   update(deltaTime) {
     super.update(deltaTime);
@@ -319,23 +334,24 @@ export class SpiderEnemy extends Enemy {
   draw(context) {
     context.beginPath();
     context.moveTo(this.x + this.width / 2, 0);
-    context.lineTo(this.x + this.width / 2, this.y + 10);
+    context.lineTo(this.x + this.width / 2, this.y + 8);
     context.stroke();
     super.draw(context);
   }
 }
 
+// spinner 1917x212 → 9 frames × 213
 export class SpinnerEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 80;
-    this.spriteHeight = 80;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.spriteWidth = 213;
+    this.spriteHeight = 212;
+    this.width = 80;
+    this.height = 80;
     this.x = this.game.width;
-    this.y = Math.random() * this.game.height * 0.5;
-    this.speedX = Math.random() * 1.5 + 1;
+    this.y = Math.random() * this.game.height * 0.3 + this.game.height * 0.2;
+    this.speedX = Math.random() * 1.2 + 0.8;
     this.speedY = 0;
     this.maxFrame = 8;
     this.image = document.getElementById("enemy_spinner");
@@ -344,6 +360,6 @@ export class SpinnerEnemy extends Enemy {
   update(deltaTime) {
     super.update(deltaTime);
     this.angle += 0.1;
-    this.y += Math.sin(this.angle) * 3;
+    this.y += Math.sin(this.angle) * 2.5;
   }
 }

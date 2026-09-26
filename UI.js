@@ -22,9 +22,14 @@ export class UI {
     context.font = this.fontSize * 0.8 + "px " + this.fontFamily;
     context.fillText("Time: " + (this.game.time * 0.001).toFixed(1), 20, 80);
 
-    // Level indicator
+    // Level
+    const levelName = this.game.level === 1 ? "City" : "Forest";
+    const target =
+      this.game.level === 1
+        ? this.game.level1Target
+        : this.game.level2Target;
     context.fillText(
-      "Level: " + (this.game.level === 1 ? "City" : "Forest"),
+      "Level: " + levelName + " (Goal: " + target + ")",
       20,
       110,
     );
@@ -34,22 +39,25 @@ export class UI {
       context.drawImage(this.livesImage, 25 * i + 20, 125, 25, 25);
     }
 
-    // Game over message
+    // Game over / victory message
     if (this.game.gameOver) {
       context.textAlign = "center";
       context.font = this.fontSize * 2 + "px " + this.fontFamily;
-      if (this.game.score > this.game.winningScore) {
+
+      if (this.game.level === 2 && this.game.score >= this.game.level2Target) {
         context.fillText(
           "Victory!",
           this.game.width * 0.5,
-          this.game.height * 0.5 - 20,
+          this.game.height * 0.5 - 30,
         );
-        context.font = this.fontSize * 0.7 + "px " + this.fontFamily;
+        context.font = this.fontSize * 0.8 + "px " + this.fontFamily;
         context.fillText(
-          "They did not know who they were dealing with!",
+          "You conquered the Forest!",
           this.game.width * 0.5,
           this.game.height * 0.5 + 20,
         );
+      } else if (this.game.level === 1 && this.game.waitingForLevelChoice) {
+        // modal is showing, no extra text needed
       } else {
         context.fillText(
           "You Failed.",
