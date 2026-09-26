@@ -23,11 +23,11 @@ export class UI {
     for (let i = 0; i < this.game.lives; i++) {
       context.drawImage(this.livesImage, 25 * i + 20, 95, 25, 25);
     }
-    // gameover message
+    // game over message
     if (this.game.gameOver) {
       context.textAlign = "center";
       context.font = this.fontSize * 2 + "px " + this.fontFamily;
-      if (this.game.score > 5) {
+      if (this.game.score > this.game.winningScore) {
         context.fillText(
           "Victory!",
           this.game.width * 0.5,
