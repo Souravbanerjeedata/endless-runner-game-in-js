@@ -24,17 +24,51 @@ window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas1");
   const ctx = canvas.getContext("2d");
   const startModal = document.getElementById("startModal");
+  const rotateOverlay = document.getElementById("rotateOverlay");
   const btnStart = document.getElementById("btnStart");
   const levelModal = document.getElementById("levelModal");
   const btnContinue = document.getElementById("btnContinue");
   const btnQuit = document.getElementById("btnQuit");
 
+  function isPortrait() {
+    return window.innerHeight > window.innerWidth;
+  }
+
+  function updateOrientation() {
+    if (isPortrait()) {
+      rotateOverlay.classList.add("show");
+      if (typeof game !== "undefined" && game) {
+        game.orientationPaused = true;
+      }
+    } else {
+      rotateOverlay.classList.remove("show");
+      if (typeof game !== "undefined" && game) {
+        game.orientationPaused = false;
+      }
+    }
+  }
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    if (typeof game !== "undefined" && game) {
+      game.width = canvas.width;
+      game.height = canvas.height;
+      if (game.level === 1) {
+        game.groundMargin = Math.floor(game.height * 0.16);
+      } else {
+        game.groundMargin = Math.floor(game.height * 0.08);
+      }
+      if (game.player) {
+        const maxY = game.height - game.player.height - game.groundMargin;
+        if (game.player.y > maxY) game.player.y = maxY;
+      }
+    }
+    updateOrientation();
   }
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 100));
 
   class Game {
     constructor(width, height) {
@@ -67,13 +101,14 @@ window.addEventListener("load", () => {
       this.level2Target = 100;
       this.paused = true;
       this.waitingForLevelChoice = false;
+      this.orientationPaused = false;
 
       this.player.currentState = this.player.states[0];
       this.player.currentState.enter();
     }
 
     update(deltaTime) {
-      if (this.paused || this.gameOver) return;
+      if (this.paused || this.gameOver || this.orientationPaused) return;
 
       this.time += deltaTime;
 
@@ -211,6 +246,8 @@ window.addEventListener("load", () => {
   }
 
   const game = new Game(canvas.width, canvas.height);
+  game.orientationPaused = isPortrait();
+  updateOrientation();
   let lastTime = 0;
 
   btnStart.addEventListener("click", () => {

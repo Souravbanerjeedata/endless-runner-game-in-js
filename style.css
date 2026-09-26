@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -11,6 +12,9 @@ body {
   overflow: hidden;
   background: #000;
   font-family: "Creepster", cursive;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 #canvas1 {
@@ -21,6 +25,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: 1;
+  touch-action: none;
 }
 
 #player,
@@ -32,6 +37,52 @@ body {
 #enemy_spider, #enemy_spinner,
 #fire, #collisionAnimation, #lives {
   display: none;
+}
+
+.rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  background: #0a0a12;
+  color: #eee;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.rotate-overlay.show {
+  display: flex;
+}
+
+.rotate-content .rotate-icon {
+  font-size: 4rem;
+  animation: rotate-hint 1.4s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+.rotate-content p {
+  font-size: 1.5rem;
+  margin: 6px 0;
+}
+
+.rotate-sub {
+  color: #8a8aa3;
+  font-size: 1rem !important;
+}
+
+@keyframes rotate-hint {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(90deg);
+  }
+  60% {
+    transform: rotate(90deg);
+  }
 }
 
 .modal {
@@ -55,12 +106,14 @@ body {
 .modal-content {
   background: linear-gradient(145deg, #1a1a2e, #16213e);
   color: #eee;
-  padding: 40px 50px;
+  padding: 28px 32px;
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
   border: 3px solid #e94560;
-  max-width: 90%;
+  max-width: 92%;
+  max-height: 90vh;
+  overflow-y: auto;
   pointer-events: auto;
   position: relative;
   z-index: 10000;
@@ -71,39 +124,39 @@ body {
 }
 
 .modal-content h1 {
-  font-size: 2.6rem;
+  font-size: 2.2rem;
   color: #e94560;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   text-shadow: 2px 2px 0 #000;
 }
 
 .modal-content p {
-  font-size: 1.15rem;
-  margin: 6px 0;
-  line-height: 1.4;
+  font-size: 1.05rem;
+  margin: 5px 0;
+  line-height: 1.35;
 }
 
 .rules {
   text-align: left;
-  margin: 12px 0 8px;
+  margin: 10px 0 6px;
 }
 
 .rules strong {
   color: #00f5d4;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
 .modal-buttons {
-  margin-top: 28px;
+  margin-top: 22px;
   display: flex;
-  gap: 20px;
+  gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .modal-buttons button {
   font-family: "Creepster", cursive;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   padding: 12px 28px;
   border: none;
   border-radius: 8px;
@@ -112,6 +165,8 @@ body {
   pointer-events: auto;
   position: relative;
   z-index: 10001;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 #btnContinue,
@@ -134,4 +189,16 @@ body {
 #btnQuit:hover {
   background: #666;
   transform: scale(1.05);
+}
+
+@media (max-width: 700px) {
+  .modal-content h1 {
+    font-size: 1.7rem;
+  }
+  .modal-content p {
+    font-size: 0.95rem;
+  }
+  .modal-content {
+    padding: 20px 18px;
+  }
 }
