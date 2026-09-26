@@ -216,6 +216,7 @@ window.addEventListener("load", () => {
   btnStart.addEventListener("click", () => {
     startModal.classList.remove("show");
     game.paused = false;
+    game.time = 0;
     game.player.setState(1, 1);
   });
 
