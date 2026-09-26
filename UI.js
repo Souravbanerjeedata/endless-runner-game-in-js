@@ -14,16 +14,27 @@ export class UI {
     context.font = this.fontSize + "px " + this.fontFamily;
     context.textAlign = "left";
     context.fillStyle = this.game.fontColor;
-    // score
+
+    // Score
     context.fillText("Score: " + this.game.score, 20, 50);
-    // timer
+
+    // Timer
     context.font = this.fontSize * 0.8 + "px " + this.fontFamily;
     context.fillText("Time: " + (this.game.time * 0.001).toFixed(1), 20, 80);
-    // lives
+
+    // Level indicator
+    context.fillText(
+      "Level: " + (this.game.level === 1 ? "City" : "Forest"),
+      20,
+      110,
+    );
+
+    // Lives
     for (let i = 0; i < this.game.lives; i++) {
-      context.drawImage(this.livesImage, 25 * i + 20, 95, 25, 25);
+      context.drawImage(this.livesImage, 25 * i + 20, 125, 25, 25);
     }
-    // game over message
+
+    // Game over message
     if (this.game.gameOver) {
       context.textAlign = "center";
       context.font = this.fontSize * 2 + "px " + this.fontFamily;
