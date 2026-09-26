@@ -188,14 +188,14 @@ window.addEventListener("load", () => {
         ];
 
         const r = Math.random();
-        if (r < 0.15) {
-          // small group of zombies
-          this.enemies.push(new ZombieEnemy(this));
-          this.enemies.push(new ZombieEnemy(this));
-        } else if (r < 0.28) {
-          // small group of spinners
-          this.enemies.push(new SpinnerEnemy(this));
-          this.enemies.push(new SpinnerEnemy(this));
+        if (r < 0.18) {
+          // group of zombies (2–6)
+          const n = 2 + Math.floor(Math.random() * 5);
+          for (let i = 0; i < n; i++) this.enemies.push(new ZombieEnemy(this));
+        } else if (r < 0.32) {
+          // group of spinners (2–6)
+          const n = 2 + Math.floor(Math.random() * 5);
+          for (let i = 0; i < n; i++) this.enemies.push(new SpinnerEnemy(this));
         } else if (r < 0.55) {
           const GroundClass =
             groundTypes[Math.floor(Math.random() * groundTypes.length)];

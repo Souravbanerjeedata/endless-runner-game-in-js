@@ -190,12 +190,12 @@ export class HandEnemy extends Enemy {
     super();
     this.game = game;
     this.image = document.getElementById("enemy_hand");
-    // sheet 446x80 — 5 frames
-    this.maxFrame = 4;
-    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 89;
-    this.spriteHeight = this.image.naturalHeight || 80;
-    this.width = this.spriteWidth * 0.85;
-    this.height = this.spriteHeight * 0.85;
+    // sheet 446x80 → 8 frames × 55
+    this.maxFrame = 7;
+    this.spriteWidth = 55;
+    this.spriteHeight = 80;
+    this.width = 55;
+    this.height = 80;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = 0;
@@ -204,17 +204,17 @@ export class HandEnemy extends Enemy {
 }
 
 // ==================== FOREST FLYING ====================
-// ghost_4 sheet 361x70
+// ghost_4 sheet 361x70 → 6 frames × 60
 export class Ghost4Enemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
     this.image = document.getElementById("enemy_ghost_4");
-    this.maxFrame = 4;
-    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 72;
-    this.spriteHeight = this.image.naturalHeight || 70;
-    this.width = this.spriteWidth;
-    this.height = this.spriteHeight;
+    this.maxFrame = 5;
+    this.spriteWidth = 60;
+    this.spriteHeight = 70;
+    this.width = 60;
+    this.height = 70;
     this.x = this.game.width;
     this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.15;
     this.speedX = Math.random() * 1.2 + 0.8;
@@ -235,16 +235,16 @@ export class Ghost4Enemy extends Enemy {
   }
 }
 
-// ghost_3 sheet 524x70 — 4 frames × 131
+// ghost_3 sheet 524x70 → 6 frames × 87
 export class Ghost3Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
     this.image = document.getElementById("enemy_ghost_3");
-    this.maxFrame = 3;
-    this.spriteWidth = Math.floor(this.image.naturalWidth / (this.maxFrame + 1)) || 131;
-    this.spriteHeight = this.image.naturalHeight || 70;
-    this.width = this.spriteWidth * 0.75;
-    this.height = this.spriteHeight;
+    this.maxFrame = 5;
+    this.spriteWidth = 87;
+    this.spriteHeight = 70;
+    this.width = 87;
+    this.height = 70;
   }
 }
 
