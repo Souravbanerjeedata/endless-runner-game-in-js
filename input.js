@@ -9,9 +9,7 @@ export class InputHandler {
     this.rollingHeld = false;
     this.activeTouchId = null;
     this.swipeThreshold = 40;
-    this.doubleTapMs = 300;
-    this.holdLeft = false;
-    this.holdRight = false;
+    this.doubleTapMs = 320;
 
     window.addEventListener("keydown", (e) => {
       if (
@@ -23,7 +21,9 @@ export class InputHandler {
         this.keys.indexOf(e.key) === -1
       ) {
         this.keys.push(e.key);
-      } else if (e.key === "d") this.game.debug = !this.game.debug;
+      } else if (e.key === "d") {
+        this.game.debug = !this.game.debug;
+      }
     });
     window.addEventListener("keyup", (e) => {
       if (
@@ -44,7 +44,8 @@ export class InputHandler {
     canvas.addEventListener(
       "touchstart",
       (e) => {
-        if (this.game.paused || this.game.gameOver) return;
+        if (this.game.paused || this.game.gameOver || this.game.orientationPaused)
+          return;
         e.preventDefault();
         const t = e.changedTouches[0];
         this.activeTouchId = t.identifier;
@@ -62,11 +63,9 @@ export class InputHandler {
 
         const mid = window.innerWidth * 0.5;
         if (t.clientX < mid) {
-          this.holdLeft = true;
           this.addKey("ArrowLeft");
           this.removeKey("ArrowRight");
         } else {
-          this.holdRight = true;
           this.addKey("ArrowRight");
           this.removeKey("ArrowLeft");
         }
@@ -77,25 +76,21 @@ export class InputHandler {
     canvas.addEventListener(
       "touchmove",
       (e) => {
-        if (this.game.paused || this.game.gameOver) return;
+        if (this.game.paused || this.game.gameOver || this.game.orientationPaused)
+          return;
         e.preventDefault();
-        let t = null;
+        let t = e.changedTouches[0];
         for (let i = 0; i < e.changedTouches.length; i++) {
           if (e.changedTouches[i].identifier === this.activeTouchId) {
             t = e.changedTouches[i];
             break;
           }
         }
-        if (!t) t = e.changedTouches[0];
         const mid = window.innerWidth * 0.5;
         if (t.clientX < mid) {
-          this.holdLeft = true;
-          this.holdRight = false;
           this.addKey("ArrowLeft");
           this.removeKey("ArrowRight");
         } else {
-          this.holdRight = true;
-          this.holdLeft = false;
           this.addKey("ArrowRight");
           this.removeKey("ArrowLeft");
         }
@@ -107,15 +102,13 @@ export class InputHandler {
       "touchend",
       (e) => {
         e.preventDefault();
-        let t = null;
+        let t = e.changedTouches[0];
         for (let i = 0; i < e.changedTouches.length; i++) {
           if (e.changedTouches[i].identifier === this.activeTouchId) {
             t = e.changedTouches[i];
             break;
           }
         }
-        if (!t) t = e.changedTouches[0];
-
         const dx = t.clientX - this.touchStartX;
         const dy = t.clientY - this.touchStartY;
         const absX = Math.abs(dx);
@@ -123,15 +116,10 @@ export class InputHandler {
         const dt = Date.now() - this.touchStartTime;
 
         if (absY > this.swipeThreshold && absY > absX && dt < 500) {
-          if (dy < 0) {
-            this.pulseKey("ArrowUp", 120);
-          } else {
-            this.pulseKey("ArrowDown", 120);
-          }
+          if (dy < 0) this.pulseKey("ArrowUp", 140);
+          else this.pulseKey("ArrowDown", 140);
         }
 
-        this.holdLeft = false;
-        this.holdRight = false;
         this.removeKey("ArrowLeft");
         this.removeKey("ArrowRight");
         this.activeTouchId = null;
@@ -139,17 +127,11 @@ export class InputHandler {
       { passive: false },
     );
 
-    canvas.addEventListener(
-      "touchcancel",
-      () => {
-        this.holdLeft = false;
-        this.holdRight = false;
-        this.removeKey("ArrowLeft");
-        this.removeKey("ArrowRight");
-        this.activeTouchId = null;
-      },
-      { passive: false },
-    );
+    canvas.addEventListener("touchcancel", () => {
+      this.removeKey("ArrowLeft");
+      this.removeKey("ArrowRight");
+      this.activeTouchId = null;
+    });
   }
 
   addKey(key) {

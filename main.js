@@ -24,8 +24,8 @@ window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas1");
   const ctx = canvas.getContext("2d");
   const startModal = document.getElementById("startModal");
-  const rotateOverlay = document.getElementById("rotateOverlay");
   const btnStart = document.getElementById("btnStart");
+  const rotateOverlay = document.getElementById("rotateOverlay");
   const levelModal = document.getElementById("levelModal");
   const btnContinue = document.getElementById("btnContinue");
   const btnQuit = document.getElementById("btnQuit");
@@ -35,23 +35,20 @@ window.addEventListener("load", () => {
   }
 
   function updateOrientation() {
+    if (!rotateOverlay) return;
     if (isPortrait()) {
       rotateOverlay.classList.add("show");
-      if (typeof game !== "undefined" && game) {
-        game.orientationPaused = true;
-      }
+      if (game) game.orientationPaused = true;
     } else {
       rotateOverlay.classList.remove("show");
-      if (typeof game !== "undefined" && game) {
-        game.orientationPaused = false;
-      }
+      if (game) game.orientationPaused = false;
     }
   }
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    if (typeof game !== "undefined" && game) {
+    if (game) {
       game.width = canvas.width;
       game.height = canvas.height;
       if (game.level === 1) {
@@ -66,9 +63,6 @@ window.addEventListener("load", () => {
     }
     updateOrientation();
   }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-  window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 100));
 
   class Game {
     constructor(width, height) {
@@ -174,9 +168,7 @@ window.addEventListener("load", () => {
     startLevel2() {
       this.level = 2;
       this.background.setLevel(2);
-
       this.groundMargin = Math.floor(this.height * 0.08);
-
       this.enemies = [];
       this.particles = [];
       this.collisions = [];
@@ -185,13 +177,10 @@ window.addEventListener("load", () => {
       this.enemyInterval = 1100;
       this.paused = false;
       this.waitingForLevelChoice = false;
-
       this.player.x = 50;
-      this.player.y =
-        this.height - this.player.height - this.groundMargin;
+      this.player.y = this.height - this.player.height - this.groundMargin;
       this.player.vy = 0;
       this.player.setState(1, 1);
-
       levelModal.classList.remove("show");
     }
 
@@ -245,21 +234,54 @@ window.addEventListener("load", () => {
     }
   }
 
-  const game = new Game(canvas.width, canvas.height);
+  let game = null;
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("orientationchange", () => {
+    setTimeout(resizeCanvas, 150);
+  });
+
+  game = new Game(canvas.width, canvas.height);
   game.orientationPaused = isPortrait();
   updateOrientation();
   let lastTime = 0;
 
-  btnStart.addEventListener("click", () => {
+  function startGame() {
+    if (!startModal.classList.contains("show")) return;
     startModal.classList.remove("show");
     game.paused = false;
     game.time = 0;
     game.player.setState(1, 1);
-  });
+  }
+
+  if (btnStart) {
+    btnStart.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      startGame();
+    });
+    btnStart.addEventListener(
+      "touchend",
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        startGame();
+      },
+      { passive: false },
+    );
+  }
 
   btnContinue.addEventListener("click", () => {
     game.startLevel2();
   });
+  btnContinue.addEventListener(
+    "touchend",
+    (e) => {
+      e.preventDefault();
+      game.startLevel2();
+    },
+    { passive: false },
+  );
 
   btnQuit.addEventListener("click", () => {
     levelModal.classList.remove("show");

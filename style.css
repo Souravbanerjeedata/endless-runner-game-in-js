@@ -43,13 +43,14 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 20000;
+  z-index: 30000;
   background: #0a0a12;
   color: #eee;
   justify-content: center;
   align-items: center;
   text-align: center;
   padding: 24px;
+  pointer-events: auto;
 }
 
 .rotate-overlay.show {
@@ -73,27 +74,19 @@ body {
 }
 
 @keyframes rotate-hint {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  40% {
-    transform: rotate(90deg);
-  }
-  60% {
-    transform: rotate(90deg);
-  }
+  0%, 100% { transform: rotate(0deg); }
+  40%, 60% { transform: rotate(90deg); }
 }
 
 .modal {
   display: none;
   position: fixed;
-  z-index: 9999;
+  z-index: 20000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.85);
   justify-content: center;
   align-items: center;
   pointer-events: auto;
@@ -112,11 +105,13 @@ body {
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
   border: 3px solid #e94560;
   max-width: 92%;
-  max-height: 90vh;
+  max-height: 88vh;
   overflow-y: auto;
   pointer-events: auto;
   position: relative;
-  z-index: 10000;
+  z-index: 20001;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
 }
 
 .start-modal-content {
@@ -146,6 +141,18 @@ body {
   font-size: 1.15rem;
 }
 
+.controls-mobile {
+  display: none;
+}
+.controls-desktop {
+  display: block;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .controls-mobile { display: block; }
+  .controls-desktop { display: none; }
+}
+
 .modal-buttons {
   margin-top: 22px;
   display: flex;
@@ -157,16 +164,18 @@ body {
 .modal-buttons button {
   font-family: "Creepster", cursive;
   font-size: 1.25rem;
-  padding: 12px 28px;
+  padding: 14px 32px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.15s, background 0.15s;
   pointer-events: auto;
   position: relative;
-  z-index: 10001;
-  min-height: 44px;
-  min-width: 44px;
+  z-index: 20002;
+  min-height: 48px;
+  min-width: 120px;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 #btnContinue,
@@ -175,10 +184,10 @@ body {
   color: white;
 }
 
-#btnContinue:hover,
-#btnStart:hover {
+#btnContinue:active,
+#btnStart:active {
   background: #ff6b81;
-  transform: scale(1.05);
+  transform: scale(0.97);
 }
 
 #btnQuit {
@@ -186,37 +195,12 @@ body {
   color: #ddd;
 }
 
-#btnQuit:hover {
+#btnQuit:active {
   background: #666;
-  transform: scale(1.05);
 }
 
 @media (max-width: 700px) {
-  .modal-content h1 {
-    font-size: 1.7rem;
-  }
-  .modal-content p {
-    font-size: 0.95rem;
-  }
-  .modal-content {
-    padding: 20px 18px;
-  }
+  .modal-content h1 { font-size: 1.6rem; }
+  .modal-content p { font-size: 0.95rem; }
+  .modal-content { padding: 18px 16px; }
 }
-
-
-.controls-mobile {
-  display: none;
-}
-.controls-desktop {
-  display: block;
-}
-
-@media (hover: none) and (pointer: coarse), (max-width: 900px) {
-  .controls-mobile {
-    display: block;
-  }
-  .controls-desktop {
-    display: none;
-  }
-}
-
