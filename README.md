@@ -1,5 +1,9 @@
 # City & Forest Runner
 
+<div align="center">
+  <img src="preview.png" width="1920" heigh="948" />
+</div>
+
 A 2D side-scrolling endless runner built with pure HTML5 Canvas and vanilla JavaScript.
 
 **Live Demo:** [Play here](https://souravbanerjeedata.github.io/endless-runner-game-in-js/)
