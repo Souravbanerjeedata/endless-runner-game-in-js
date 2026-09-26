@@ -87,10 +87,9 @@ window.addEventListener("load", () => {
 
       if (game.background) {
         game.background.height = game.height;
-        [
-          ...game.background.cityLayers,
-          ...game.background.forestLayers,
-        ].forEach((layer) => (layer.height = game.height));
+        [...game.background.cityLayers, ...game.background.forestLayers].forEach(
+          (layer) => (layer.height = game.height),
+        );
       }
 
       if (game.player) {
@@ -368,7 +367,6 @@ window.addEventListener("load", () => {
     resizeCanvas();
   });
 
-  let game = null;
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
   window.addEventListener("orientationchange", () => {
@@ -376,6 +374,7 @@ window.addEventListener("load", () => {
   });
 
   game = new Game(canvas.width, canvas.height);
+  resizeCanvas();
   game.orientationPaused = isPortrait();
   updateOrientation();
   let lastTime = 0;
@@ -394,17 +393,9 @@ window.addEventListener("load", () => {
       e.stopPropagation();
       startGame();
     });
-    btnStart.addEventListener(
-      "touchend",
-      (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        startGame();
-      },
-      { passive: false },
-    );
   }
 
+  
   let endModalShown = false;
 
   function quitGame() {
@@ -420,7 +411,7 @@ window.addEventListener("load", () => {
     // Fallback if browser blocks window.close()
     document.body.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a12;color:#eee;font-family:Creepster,cursive;flex-direction:column;gap:12px;text-align:center;padding:20px">' +
-      '<h1 style="color:#e94560;font-size:2.5rem">Thanks for playing!</h1>' +
+      "<h1 style=\"color:#e94560;font-size:2.5rem\">Thanks for playing!</h1>" +
       "<p>You can close this tab now.</p>" +
       "</div>";
   }
@@ -465,17 +456,8 @@ window.addEventListener("load", () => {
     requestAnimationFrame(animate);
   }
 
-  btnContinue.addEventListener("click", () => {
-    game.startLevel2();
-  });
-  btnContinue.addEventListener(
-    "touchend",
-    (e) => {
-      e.preventDefault();
-      game.startLevel2();
-    },
-    { passive: false },
-  );
+
+  bindTap(btnContinue, () => game.startLevel2());
 
   function bindTap(el, fn) {
     if (!el) return;
@@ -484,22 +466,13 @@ window.addEventListener("load", () => {
       e.stopPropagation();
       fn();
     });
-    el.addEventListener(
-      "touchend",
-      (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        fn();
-      },
-      { passive: false },
-    );
   }
 
   bindTap(btnQuit, quitGame);
   bindTap(btnQuitEnd, quitGame);
   bindTap(btnPlayAgain, playAgain);
 
-  function animate(timeStamp) {
+    function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
