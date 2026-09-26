@@ -202,3 +202,21 @@ body {
     padding: 20px 18px;
   }
 }
+
+
+.controls-mobile {
+  display: none;
+}
+.controls-desktop {
+  display: block;
+}
+
+@media (hover: none) and (pointer: coarse), (max-width: 900px) {
+  .controls-mobile {
+    display: block;
+  }
+  .controls-desktop {
+    display: none;
+  }
+}
+
