@@ -1,8 +1,8 @@
 class Layer {
   constructor(game, width, height, speedModifier, image) {
     this.game = game;
-    this.width = width;
-    this.height = height;
+    this.width = 1667;
+    this.height = game.height;
     this.speedModifier = speedModifier;
     this.image = image;
     this.x = 0;

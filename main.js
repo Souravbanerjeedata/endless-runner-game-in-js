@@ -7,14 +7,18 @@ import { UI } from "./UI.js";
 window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas1");
   const ctx = canvas.getContext("2d");
-  canvas.width = 500;
-  canvas.height = 500;
+  // Make canvas match the user's screen
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas(); // Set initial size
 
   class Game {
     constructor(width, height) {
       this.width = width;
       this.height = height;
-      this.groundMargin = 80;
+      this.groundMargin = Math.floor(this.height * 0.16); // ~16% of screen height
       this.speed = 0;
       this.maxSpeed = 4;
       this.background = new Background(this);
@@ -116,4 +120,9 @@ window.addEventListener("load", () => {
     if (!game.gameOver) requestAnimationFrame(animate);
   }
   animate(0);
+});
+
+// Update size when the user resizes the window or rotates the device
+window.addEventListener("resize", () => {
+  resizeCanvas();
 });
