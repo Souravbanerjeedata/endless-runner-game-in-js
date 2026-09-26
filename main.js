@@ -34,6 +34,14 @@ window.addEventListener("load", () => {
   const levelModal = document.getElementById("levelModal");
   const btnContinue = document.getElementById("btnContinue");
   const btnQuit = document.getElementById("btnQuit");
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+  function isMobileDevice() {
+    return (
+      window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
+      navigator.maxTouchPoints > 0
+    );
+  }
 
   function isPortrait() {
     return window.innerHeight > window.innerWidth;
@@ -51,22 +59,47 @@ window.addEventListener("load", () => {
   }
 
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    canvas.width = viewportWidth;
+    canvas.height = viewportHeight;
+
     if (game) {
-      game.width = canvas.width;
-      game.height = canvas.height;
+      // Mobile uses a logical game coordinate system and a render scale so
+      // every existing sprite/UI element keeps its proportions on different
+      // screen sizes. Physics and collision code remain unchanged.
+      if (isMobileDevice() && viewportWidth > viewportHeight) {
+        game.renderScale = Math.min(1.5, Math.max(0.65, viewportWidth / 1280));
+        game.width = viewportWidth / game.renderScale;
+        game.height = viewportHeight / game.renderScale;
+      } else {
+        game.renderScale = 1;
+        game.width = viewportWidth;
+        game.height = viewportHeight;
+      }
+
       if (game.level === 1) {
         game.groundMargin = Math.floor(game.height * 0.16);
       } else {
         game.groundMargin = Math.floor(game.height * 0.08);
       }
+
+      if (game.background) {
+        game.background.height = game.height;
+        [...game.background.cityLayers, ...game.background.forestLayers].forEach(
+          (layer) => (layer.height = game.height),
+        );
+      }
+
       if (game.player) {
         const maxY = game.height - game.player.height - game.groundMargin;
         if (game.player.y > maxY) game.player.y = maxY;
       }
     }
+
     updateOrientation();
+    updateFullscreenButton();
   }
 
   class Game {
@@ -101,6 +134,7 @@ window.addEventListener("load", () => {
       this.paused = true;
       this.waitingForLevelChoice = false;
       this.orientationPaused = false;
+      this.renderScale = 1;
 
       this.player.currentState = this.player.states[0];
       this.player.currentState.enter();
@@ -257,6 +291,83 @@ window.addEventListener("load", () => {
   }
 
   let game = null;
+
+  function isFullscreen() {
+    return Boolean(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.msFullscreenElement,
+    );
+  }
+
+  function updateFullscreenButton() {
+    if (!fullscreenBtn) return;
+    const mobile = isMobileDevice();
+    fullscreenBtn.hidden = !mobile;
+    fullscreenBtn.setAttribute(
+      "aria-label",
+      isFullscreen() ? "Exit fullscreen" : "Enter fullscreen",
+    );
+    fullscreenBtn.title = isFullscreen() ? "Exit fullscreen" : "Fullscreen";
+    fullscreenBtn.innerHTML = isFullscreen()
+      ? '<span aria-hidden="true">⛶</span>'
+      : '<span aria-hidden="true">⛶</span>';
+    fullscreenBtn.classList.toggle("is-fullscreen", isFullscreen());
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (isFullscreen()) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        return;
+      }
+
+      const root = document.documentElement;
+      if (root.requestFullscreen) {
+        await root.requestFullscreen({ navigationUI: "hide" });
+      } else if (root.webkitRequestFullscreen) {
+        root.webkitRequestFullscreen();
+      } else {
+        // iOS Safari does not expose generic element fullscreen. The game
+        // remains usable there through the browser/PWA display mode.
+        updateFullscreenButton();
+        return;
+      }
+
+      if (screen.orientation?.lock) {
+        try {
+          await screen.orientation.lock("landscape");
+        } catch (_) {
+          // Orientation locking is optional and browser-dependent.
+        }
+      }
+    } catch (error) {
+      console.warn("Fullscreen request was blocked by the browser:", error);
+    } finally {
+      updateFullscreenButton();
+      setTimeout(resizeCanvas, 100);
+    }
+  }
+
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFullscreen();
+    });
+  }
+
+  document.addEventListener("fullscreenchange", () => {
+    updateFullscreenButton();
+    resizeCanvas();
+  });
+  document.addEventListener("webkitfullscreenchange", () => {
+    updateFullscreenButton();
+    resizeCanvas();
+  });
+
+  let game = null;
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
   window.addEventListener("orientationchange", () => {
@@ -392,9 +503,16 @@ window.addEventListener("load", () => {
     function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     game.update(deltaTime);
+
+    ctx.save();
+    if (game.renderScale !== 1) {
+      ctx.scale(game.renderScale, game.renderScale);
+    }
     game.draw(ctx);
+    ctx.restore();
     if (game.gameOver && !endModalShown && game.level === 2) {
       endModalShown = true;
       showEndModal(!!game.won);

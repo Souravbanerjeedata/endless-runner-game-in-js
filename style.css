@@ -208,3 +208,94 @@ body {
   .modal-content p { font-size: 0.95rem; }
   .modal-content { padding: 18px 16px; }
 }
+
+/* Mobile fullscreen control */
+.fullscreen-btn {
+  display: none;
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 35000;
+  width: clamp(44px, 8vw, 58px);
+  height: clamp(44px, 8vw, 58px);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(10, 10, 18, 0.78);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.fullscreen-btn:active {
+  transform: scale(0.94);
+  background: rgba(233, 69, 96, 0.9);
+}
+
+.fullscreen-btn.is-fullscreen {
+  opacity: 0.72;
+}
+
+.rotate-fullscreen-hint {
+  max-width: min(90vw, 420px);
+  margin: 14px auto 0 !important;
+  line-height: 1.4;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .fullscreen-btn {
+    display: flex;
+  }
+
+  .modal-content {
+    width: min(92vw, 560px);
+    max-width: 92vw;
+    max-height: calc(100dvh - 32px);
+    padding: clamp(16px, 4vw, 24px);
+    border-width: clamp(2px, 0.5vw, 3px);
+    border-radius: clamp(12px, 3vw, 18px);
+  }
+
+  .modal-content h1 {
+    font-size: clamp(1.35rem, 5.5vw, 2rem);
+    margin-bottom: clamp(8px, 2vw, 14px);
+  }
+
+  .modal-content p {
+    font-size: clamp(0.8rem, 3.1vw, 1rem);
+  }
+
+  .rules strong {
+    font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+  }
+
+  .modal-buttons {
+    margin-top: clamp(14px, 4vw, 22px);
+    gap: clamp(8px, 3vw, 16px);
+  }
+
+  .modal-buttons button {
+    min-height: clamp(46px, 11vw, 54px);
+    min-width: clamp(108px, 28vw, 150px);
+    padding: clamp(10px, 2.8vw, 14px) clamp(18px, 5vw, 32px);
+    font-size: clamp(1rem, 4.5vw, 1.25rem);
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape) {
+  .rotate-content .rotate-icon {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: clamp(8px, 2vw, 16px);
+  }
+
+  .rotate-content p {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+  }
+}

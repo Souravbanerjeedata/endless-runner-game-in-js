@@ -20,6 +20,16 @@
   <body>
     <canvas id="canvas1"></canvas>
 
+    <button
+      type="button"
+      id="fullscreenBtn"
+      class="fullscreen-btn"
+      aria-label="Enter fullscreen"
+      title="Fullscreen"
+    >
+      <span aria-hidden="true">⛶</span>
+    </button>
+
     <div id="startModal" class="modal show">
       <div class="modal-content start-modal-content">
         <h1>City & Forest Runner</h1>
@@ -78,6 +88,7 @@
         <div class="rotate-icon">📱</div>
         <p>Please rotate your device</p>
         <p class="rotate-sub">Landscape mode required to play</p>
+        <p class="rotate-sub rotate-fullscreen-hint">Tap ⛶ for fullscreen and landscape when supported.</p>
       </div>
     </div>
 
