@@ -30,7 +30,6 @@ export class Background {
     this.width = 1667;
     this.height = game.height;
 
-    // City layers (parallax speeds)
     this.cityLayers = [
       new Layer(game, this.width, this.height, 0.2, document.getElementById("layer1")),
       new Layer(game, this.width, this.height, 0.4, document.getElementById("layer2")),
@@ -39,7 +38,6 @@ export class Background {
       new Layer(game, this.width, this.height, 1.0, document.getElementById("layer5")),
     ];
 
-    // Forest layers (same parallax logic)
     this.forestLayers = [
       new Layer(game, this.width, this.height, 0.2, document.getElementById("forest-layer1")),
       new Layer(game, this.width, this.height, 0.4, document.getElementById("forest-layer2")),
@@ -48,7 +46,6 @@ export class Background {
       new Layer(game, this.width, this.height, 1.0, document.getElementById("forest-layer5")),
     ];
 
-    // Start with City
     this.backgroundLayers = this.cityLayers;
   }
 
@@ -58,7 +55,6 @@ export class Background {
     } else if (level === 2) {
       this.backgroundLayers = this.forestLayers;
     }
-    // Reset scroll position for clean transition
     this.backgroundLayers.forEach((layer) => (layer.x = 0));
   }
 

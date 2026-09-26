@@ -39,7 +39,6 @@ class Enemy {
   }
 }
 
-// ==================== CITY ====================
 export class FlyingEnemy extends Enemy {
   constructor(game) {
     super();
@@ -111,8 +110,6 @@ export class ClimbingEnemy extends Enemy {
   }
 }
 
-// ==================== FOREST GROUND ====================
-// digger sheet 2080x178 → 8 frames × 260
 export class DiggerEnemy extends Enemy {
   constructor(game) {
     super();
@@ -130,7 +127,6 @@ export class DiggerEnemy extends Enemy {
   }
 }
 
-// ground_zombie 961x90 → ~8 frames × 120
 export class GroundZombieEnemy extends Enemy {
   constructor(game) {
     super();
@@ -148,7 +144,6 @@ export class GroundZombieEnemy extends Enemy {
   }
 }
 
-// zombie 2336x410 → 8 frames × 292
 export class ZombieEnemy extends Enemy {
   constructor(game) {
     super();
@@ -166,7 +161,6 @@ export class ZombieEnemy extends Enemy {
   }
 }
 
-// worm 482x60 → 6 frames × 80
 export class WormEnemy extends Enemy {
   constructor(game) {
     super();
@@ -184,13 +178,11 @@ export class WormEnemy extends Enemy {
   }
 }
 
-// hand 446x80 → 5 frames × 89
 export class HandEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
     this.image = document.getElementById("enemy_hand");
-    // sheet 446x80 → 8 frames × 55
     this.maxFrame = 7;
     this.spriteWidth = 55;
     this.spriteHeight = 80;
@@ -203,8 +195,6 @@ export class HandEnemy extends Enemy {
   }
 }
 
-// ==================== FOREST FLYING ====================
-// ghost_4 sheet 361x70 → 6 frames × 60
 export class Ghost4Enemy extends Enemy {
   constructor(game) {
     super();
@@ -235,7 +225,6 @@ export class Ghost4Enemy extends Enemy {
   }
 }
 
-// ghost_3 sheet 524x70 → 6 frames × 87
 export class Ghost3Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
@@ -248,7 +237,6 @@ export class Ghost3Enemy extends Ghost4Enemy {
   }
 }
 
-// ghost_2 160x89 → 2 frames × 80
 export class Ghost2Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
@@ -261,7 +249,6 @@ export class Ghost2Enemy extends Ghost4Enemy {
   }
 }
 
-// bat_3 1596x188 → 6 frames × 266
 export class Bat3Enemy extends Enemy {
   constructor(game) {
     super();
@@ -286,7 +273,6 @@ export class Bat3Enemy extends Enemy {
   }
 }
 
-// raven 1626x194 → 6 frames × 271
 export class RavenEnemy extends Enemy {
   constructor(game) {
     super();
@@ -310,12 +296,10 @@ export class RavenEnemy extends Enemy {
   }
 }
 
-// spider 1860x175 → 6 frames × 310
 export class SpiderEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    // sheet 1860x175 → 6 frames × 310 (same as classic spider)
     this.spriteWidth = 310;
     this.spriteHeight = 175;
     this.width = 100;
@@ -329,22 +313,18 @@ export class SpiderEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
-    // Same behaviour as Level 1 ClimbingEnemy (spider_big):
-    // bounce at ground, delete if goes above screen
     if (this.y > this.game.height - this.height - this.game.groundMargin)
       this.speedY *= -1;
     if (this.y < -this.height) this.markedForDeletion = true;
   }
   draw(context) {
     super.draw(context);
-    // web line from top of screen (same as L1)
     context.beginPath();
     context.moveTo(this.x + this.width / 2, 0);
     context.lineTo(this.x + this.width / 2, this.y + 10);
     context.stroke();
   }
 }
-
 
 export class SpinnerEnemy extends Enemy {
   constructor(game) {

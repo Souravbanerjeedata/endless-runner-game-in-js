@@ -44,7 +44,6 @@ export class Player {
     this.checkCollison();
     this.currentState.handleInput(input);
 
-    // horizontal movement – blocked during Hit (state 6)
     this.x += this.speed;
     if (input.includes("ArrowRight") && this.currentState !== this.states[6])
       this.speed = this.maxSpeed;
@@ -56,21 +55,18 @@ export class Player {
     else if (this.x > this.game.width - this.width)
       this.x = this.game.width - this.width;
 
-    // vertical movement
     this.y += this.vy;
     if (!this.onGround()) this.vy += this.weight;
     else this.vy = 0;
 
-    // Soft top limit: stay on screen, no bounce
     if (this.y < 0) {
       this.y = 0;
-      if (this.vy < 0) this.vy = 0; // only stop upward motion once
+      if (this.vy < 0) this.vy = 0;
     }
     if (this.y > this.game.height - this.height - this.game.groundMargin) {
       this.y = this.game.height - this.height - this.game.groundMargin;
     }
 
-    // sprite animation
     if (this.frameTimer > this.frameInterval) {
       this.frameTimer = 0;
       if (this.frameX < this.maxFrame) this.frameX++;
@@ -106,7 +102,6 @@ export class Player {
     this.currentState.enter();
   }
 
-  // YOUR original collision logic restored
   checkCollison() {
     this.game.enemies.forEach((enemy) => {
       if (
@@ -123,7 +118,6 @@ export class Player {
             enemy.y + enemy.height * 0.5,
           ),
         );
-        // Rolling (4) or Diving (5) → score + floating +1
         if (
           this.currentState === this.states[4] ||
           this.currentState === this.states[5]
@@ -133,7 +127,6 @@ export class Player {
             new FloatingMessages("+1", enemy.x, enemy.y, 150, 50),
           );
         } else {
-          // Not spinning → Hit state, lose score & life
           this.setState(6, 0);
           this.game.score -= 5;
           this.game.lives--;

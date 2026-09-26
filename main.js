@@ -23,6 +23,8 @@ import { UI } from "./UI.js";
 window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas1");
   const ctx = canvas.getContext("2d");
+  const startModal = document.getElementById("startModal");
+  const btnStart = document.getElementById("btnStart");
   const levelModal = document.getElementById("levelModal");
   const btnContinue = document.getElementById("btnContinue");
   const btnQuit = document.getElementById("btnQuit");
@@ -38,7 +40,6 @@ window.addEventListener("load", () => {
     constructor(width, height) {
       this.width = width;
       this.height = height;
-      // Level 1 (City) – original feel (~16% of height, was perfect before)
       this.groundMargin = Math.floor(height * 0.16);
       this.speed = 0;
       this.maxSpeed = 4;
@@ -64,7 +65,7 @@ window.addEventListener("load", () => {
       this.level = 1;
       this.level1Target = 40;
       this.level2Target = 100;
-      this.paused = false;
+      this.paused = true;
       this.waitingForLevelChoice = false;
 
       this.player.currentState = this.player.states[0];
@@ -139,8 +140,6 @@ window.addEventListener("load", () => {
       this.level = 2;
       this.background.setLevel(2);
 
-      // Forest road is near the bottom of the art.
-      // Smaller groundMargin = lower on screen = feet on the path (not floating).
       this.groundMargin = Math.floor(this.height * 0.08);
 
       this.enemies = [];
@@ -148,7 +147,6 @@ window.addEventListener("load", () => {
       this.collisions = [];
       this.score = 0;
       this.time = 0;
-      // Fewer enemies than before
       this.enemyInterval = 1100;
       this.paused = false;
       this.waitingForLevelChoice = false;
@@ -189,11 +187,9 @@ window.addEventListener("load", () => {
 
         const r = Math.random();
         if (r < 0.18) {
-          // group of zombies (2–6)
           const n = 2 + Math.floor(Math.random() * 5);
           for (let i = 0; i < n; i++) this.enemies.push(new ZombieEnemy(this));
         } else if (r < 0.32) {
-          // group of spinners (2–6)
           const n = 2 + Math.floor(Math.random() * 5);
           for (let i = 0; i < n; i++) this.enemies.push(new SpinnerEnemy(this));
         } else if (r < 0.55) {
@@ -205,7 +201,6 @@ window.addEventListener("load", () => {
             flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
           this.enemies.push(new FlyingClass(this));
         }
-        // often also one extra flying enemy
         if (Math.random() < 0.45) {
           const FlyingClass =
             flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
@@ -217,6 +212,12 @@ window.addEventListener("load", () => {
 
   const game = new Game(canvas.width, canvas.height);
   let lastTime = 0;
+
+  btnStart.addEventListener("click", () => {
+    startModal.classList.remove("show");
+    game.paused = false;
+    game.player.setState(1, 1);
+  });
 
   btnContinue.addEventListener("click", () => {
     game.startLevel2();

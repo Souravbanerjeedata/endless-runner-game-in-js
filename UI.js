@@ -15,14 +15,11 @@ export class UI {
     context.textAlign = "left";
     context.fillStyle = this.game.fontColor;
 
-    // Score
     context.fillText("Score: " + this.game.score, 20, 50);
 
-    // Timer
     context.font = this.fontSize * 0.8 + "px " + this.fontFamily;
     context.fillText("Time: " + (this.game.time * 0.001).toFixed(1), 20, 80);
 
-    // Level
     const levelName = this.game.level === 1 ? "City" : "Forest";
     const target =
       this.game.level === 1
@@ -34,12 +31,10 @@ export class UI {
       110,
     );
 
-    // Lives
     for (let i = 0; i < this.game.lives; i++) {
       context.drawImage(this.livesImage, 25 * i + 20, 125, 25, 25);
     }
 
-    // Game over / victory message
     if (this.game.gameOver) {
       context.textAlign = "center";
       context.font = this.fontSize * 2 + "px " + this.fontFamily;
@@ -57,7 +52,6 @@ export class UI {
           this.game.height * 0.5 + 20,
         );
       } else if (this.game.level === 1 && this.game.waitingForLevelChoice) {
-        // modal is showing, no extra text needed
       } else {
         context.fillText(
           "You Failed.",

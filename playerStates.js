@@ -68,7 +68,6 @@ export class Jumping extends State {
   }
   enter() {
     if (this.game.player.onGround()) {
-      // Jump high enough to reach top enemies, but stay just below screen top
       const available =
         this.game.height -
         this.game.groundMargin -
