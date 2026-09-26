@@ -179,23 +179,27 @@ body {
 }
 
 #btnContinue,
-#btnStart {
+#btnStart,
+#btnPlayAgain {
   background: #e94560;
   color: white;
 }
 
 #btnContinue:active,
-#btnStart:active {
+#btnStart:active,
+#btnPlayAgain:active {
   background: #ff6b81;
   transform: scale(0.97);
 }
 
-#btnQuit {
+#btnQuit,
+#btnQuitEnd {
   background: #444;
   color: #ddd;
 }
 
-#btnQuit:active {
+#btnQuit:active,
+#btnQuitEnd:active {
   background: #666;
 }
 

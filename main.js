@@ -26,6 +26,11 @@ window.addEventListener("load", () => {
   const startModal = document.getElementById("startModal");
   const btnStart = document.getElementById("btnStart");
   const rotateOverlay = document.getElementById("rotateOverlay");
+  const endModal = document.getElementById("endModal");
+  const endTitle = document.getElementById("endTitle");
+  const endMessage = document.getElementById("endMessage");
+  const btnPlayAgain = document.getElementById("btnPlayAgain");
+  const btnQuitEnd = document.getElementById("btnQuitEnd");
   const levelModal = document.getElementById("levelModal");
   const btnContinue = document.getElementById("btnContinue");
   const btnQuit = document.getElementById("btnQuit");
@@ -119,12 +124,29 @@ window.addEventListener("load", () => {
       }
 
       if (this.level === 2 && this.score >= this.level2Target) {
+        this.paused = true;
+        this.speed = 0;
         this.gameOver = true;
+        this.won = true;
+        showEndModal(true);
+        return;
+      }
+
+      if (this.lives <= 0) {
+        this.paused = true;
+        this.speed = 0;
+        this.gameOver = true;
+        this.won = false;
+        showEndModal(false);
         return;
       }
 
       if (this.time > this.maxTime) {
+        this.paused = true;
+        this.speed = 0;
         this.gameOver = true;
+        this.won = false;
+        showEndModal(false);
         return;
       }
 
@@ -271,6 +293,68 @@ window.addEventListener("load", () => {
     );
   }
 
+  
+  let endModalShown = false;
+
+  function quitGame() {
+    levelModal.classList.remove("show");
+    if (endModal) endModal.classList.remove("show");
+    if (startModal) startModal.classList.remove("show");
+    game.gameOver = true;
+    game.paused = true;
+    game.speed = 0;
+    try {
+      window.close();
+    } catch (e) {}
+    // Fallback if browser blocks window.close()
+    document.body.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a12;color:#eee;font-family:Creepster,cursive;flex-direction:column;gap:12px;text-align:center;padding:20px">' +
+      "<h1 style=\"color:#e94560;font-size:2.5rem\">Thanks for playing!</h1>" +
+      "<p>You can close this tab now.</p>" +
+      "</div>";
+  }
+
+  function showEndModal(won) {
+    if (!endModal) return;
+    if (won) {
+      endTitle.textContent = "Victory!";
+      endMessage.textContent = "You cleared the forest! Great run.";
+    } else {
+      endTitle.textContent = "Game Over";
+      endMessage.textContent = "Better luck next time!";
+    }
+    endModal.classList.add("show");
+  }
+
+  function playAgain() {
+    endModalShown = false;
+    endModal.classList.remove("show");
+    levelModal.classList.remove("show");
+    game.level = 1;
+    game.background.setLevel(1);
+    game.groundMargin = Math.floor(game.height * 0.16);
+    game.enemies = [];
+    game.particles = [];
+    game.collisions = [];
+    game.floatingMessages = [];
+    game.score = 0;
+    game.time = 0;
+    game.lives = 5;
+    game.enemyInterval = 1000;
+    game.gameOver = false;
+    game.paused = false;
+    game.won = false;
+    game.waitingForLevelChoice = false;
+    game.speed = 0;
+    game.player.x = 0;
+    game.player.y = game.height - game.player.height - game.groundMargin;
+    game.player.vy = 0;
+    game.player.setState(1, 1);
+    lastTime = performance.now();
+    requestAnimationFrame(animate);
+  }
+
+
   btnContinue.addEventListener("click", () => {
     game.startLevel2();
   });
@@ -283,20 +367,42 @@ window.addEventListener("load", () => {
     { passive: false },
   );
 
-  btnQuit.addEventListener("click", () => {
-    levelModal.classList.remove("show");
-    game.gameOver = true;
-    game.paused = false;
-  });
+  function bindTap(el, fn) {
+    if (!el) return;
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fn();
+    });
+    el.addEventListener(
+      "touchend",
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fn();
+      },
+      { passive: false },
+    );
+  }
 
-  function animate(timeStamp) {
+  bindTap(btnQuit, quitGame);
+  bindTap(btnQuitEnd, quitGame);
+  bindTap(btnPlayAgain, playAgain);
+
+    function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     game.update(deltaTime);
     game.draw(ctx);
-    if (!game.gameOver) requestAnimationFrame(animate);
-    else game.draw(ctx);
+    if (game.gameOver && !endModalShown && game.level === 2) {
+      endModalShown = true;
+      showEndModal(!!game.won);
+    } else if (game.gameOver && !endModalShown && game.lives <= 0) {
+      endModalShown = true;
+      showEndModal(false);
+    }
+    requestAnimationFrame(animate);
   }
   animate(0);
 });
