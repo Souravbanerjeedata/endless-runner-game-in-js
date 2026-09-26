@@ -189,10 +189,11 @@ export class HandEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
+    // sheet 446x80 → 5 frames (approx 89px each)
     this.spriteWidth = 89;
     this.spriteHeight = 80;
-    this.width = 70;
-    this.height = 63;
+    this.width = 75;
+    this.height = 67;
     this.x = this.game.width;
     this.y = this.game.height - this.height - this.game.groundMargin;
     this.speedX = 0;
@@ -203,15 +204,15 @@ export class HandEnemy extends Enemy {
 }
 
 // ==================== FOREST FLYING ====================
-// ghost_4 361x70 → 5 frames × 72
+// ghost_4 sheet 361x70 → treat as 5 frames of 72
 export class Ghost4Enemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
     this.spriteWidth = 72;
     this.spriteHeight = 70;
-    this.width = 72;
-    this.height = 70;
+    this.width = 80;
+    this.height = 78;
     this.x = this.game.width;
     this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.2;
     this.speedX = Math.random() * 1.2 + 0.8;
@@ -234,13 +235,13 @@ export class Ghost4Enemy extends Enemy {
   }
 }
 
-// ghost_3 524x70 → 4 frames × 131
+// ghost_3 sheet 524x70 → 4 frames × 131
 export class Ghost3Enemy extends Ghost4Enemy {
   constructor(game) {
     super(game);
     this.spriteWidth = 131;
     this.spriteHeight = 70;
-    this.width = 80;
+    this.width = 100;
     this.height = 70;
     this.maxFrame = 3;
     this.image = document.getElementById("enemy_ghost_3");
@@ -314,33 +315,37 @@ export class SpiderEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
+    // sheet 1860x175 → 6 frames × 310 (same as classic spider)
     this.spriteWidth = 310;
     this.spriteHeight = 175;
     this.width = 100;
     this.height = 56;
-    this.x = Math.random() * this.game.width * 0.5 + this.game.width * 0.3;
-    this.y = 0 - this.height;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.5;
     this.speedX = 0;
-    this.speedY = Math.random() * 0.5 + 0.35;
+    this.speedY = Math.random() > 0.5 ? 1 : -1;
     this.maxFrame = 5;
     this.image = document.getElementById("enemy_spider");
-    this.maxLength = Math.random() * this.game.height * 0.4 + this.game.height * 0.2;
   }
   update(deltaTime) {
     super.update(deltaTime);
-    if (this.y > this.maxLength) this.speedY *= -1;
-    if (this.y < -this.height * 2) this.markedForDeletion = true;
+    // Same behaviour as Level 1 ClimbingEnemy (spider_big):
+    // bounce at ground, delete if goes above screen
+    if (this.y > this.game.height - this.height - this.game.groundMargin)
+      this.speedY *= -1;
+    if (this.y < -this.height) this.markedForDeletion = true;
   }
   draw(context) {
+    super.draw(context);
+    // web line from top of screen (same as L1)
     context.beginPath();
     context.moveTo(this.x + this.width / 2, 0);
-    context.lineTo(this.x + this.width / 2, this.y + 8);
+    context.lineTo(this.x + this.width / 2, this.y + 10);
     context.stroke();
-    super.draw(context);
   }
 }
 
-// spinner 1917x212 → 9 frames × 213
+
 export class SpinnerEnemy extends Enemy {
   constructor(game) {
     super();
