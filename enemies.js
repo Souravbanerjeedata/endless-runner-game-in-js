@@ -6,18 +6,76 @@ class Enemy {
     this.frameInterval = 1000 / this.fps;
     this.frameTimer = 0;
     this.markedForDeletion = false;
+    this.motionPattern = null;
+    this.patternAge = 0;
+    this.patternPhase = 0;
+    this.patternOffsetX = 0;
+    this.patternOffsetY = 0;
   }
   update(deltaTime) {
     this.x -= this.speedX + this.game.speed;
-    this.y += this.speedY;
-    if (this.frameTimer > this.frameInterval) {
+    if (!this.motionPattern) this.y += this.speedY;
+    this.frameTimer += deltaTime;
+    if (this.frameTimer >= this.frameInterval) {
+      // Advance no more than one frame per rendered update: long frames should
+      // slow animation slightly, never make a sprite flash through frames.
       this.frameTimer = 0;
-      if (this.frameX < this.maxFrame) this.frameX++;
-      else this.frameX = 0;
-    } else {
-      this.frameTimer += deltaTime;
+      const availableFrames = this.sourceFrameCount
+        ? this.sourceFrameCount
+        : this.image && this.image.naturalWidth
+          ? Math.floor(this.image.naturalWidth / this.spriteWidth)
+        : this.maxFrame + 1;
+      const lastFrame = Math.max(0, Math.min(this.maxFrame, availableFrames - 1));
+      this.frameX = (this.frameX + 1) % (lastFrame + 1);
     }
     if (this.x + this.width < 0) this.markedForDeletion = true;
+  }
+  preparePatternUpdate() {
+    this.x -= this.patternOffsetX;
+    this.y -= this.patternOffsetY;
+    this.patternOffsetX = 0;
+    this.patternOffsetY = 0;
+  }
+  applyPattern(deltaTime) {
+    if (!this.motionPattern) return;
+    this.patternAge += deltaTime / 1000;
+    const phase = this.patternAge * this.patternFrequency + this.patternPhase;
+    const sample = (angle, age) => {
+      const cycle = ((angle / (Math.PI * 2)) % 1 + 1) % 1;
+      switch (this.motionPattern) {
+        case "figure-eight":
+          return [Math.sin(angle * 2) * this.patternLateral,
+            Math.sin(angle) * this.patternAmplitude];
+        case "orbit":
+          return [Math.cos(angle) * this.patternLateral,
+            Math.sin(angle) * this.patternAmplitude];
+        case "spiral": {
+          const envelope = 0.72 + 0.28 * (1 - Math.exp(-age * 0.55));
+          return [Math.cos(angle) * this.patternLateral * envelope,
+            Math.sin(angle) * this.patternAmplitude * envelope];
+        }
+        case "swoop":
+          return [Math.cos(angle) * this.patternLateral,
+            (Math.sin(angle) + 0.35 * Math.sin(angle * 2)) * this.patternAmplitude];
+        case "flutter":
+          return [Math.sin(angle * 0.7) * this.patternLateral,
+            (Math.sin(angle) + 0.28 * Math.sin(angle * 2.7)) * this.patternAmplitude];
+        case "drift":
+          // A continuous triangle wave avoids the position snap of a sawtooth.
+          return [Math.sin(angle * 0.5) * this.patternLateral,
+            (1 - 4 * Math.abs(cycle - 0.5)) * this.patternAmplitude];
+        default: // Float: gently bob in place while advancing with the run.
+          return [0, Math.sin(angle) * this.patternAmplitude];
+      }
+    };
+    const [lateral, vertical] = sample(phase, this.patternAge);
+    const [startLateral, startVertical] = sample(this.patternPhase, 0);
+    const nextX = lateral - startLateral;
+    const nextY = vertical - startVertical;
+    this.x += nextX - this.patternOffsetX;
+    this.y += nextY - this.patternOffsetY;
+    this.patternOffsetX = nextX;
+    this.patternOffsetY = nextY;
   }
   draw(context) {
     if (this.game.debug) {
@@ -25,11 +83,14 @@ class Enemy {
       context.lineWidth = 2;
       context.strokeRect(this.x, this.y, this.width, this.height);
     }
+    const sourceFrameWidth = this.sourceFrameCount && this.image && this.image.naturalWidth
+      ? this.sourceFrameWidth || this.image.naturalWidth / this.sourceFrameCount
+      : this.spriteWidth;
     context.drawImage(
       this.image,
-      this.frameX * this.spriteWidth,
+      this.frameX * sourceFrameWidth,
       0,
-      this.spriteWidth,
+      sourceFrameWidth,
       this.spriteHeight,
       this.x,
       this.y,
@@ -58,6 +119,7 @@ export class FlyingEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     this.angle += this.va;
     this.y += Math.sin(this.angle);
   }
@@ -97,6 +159,7 @@ export class ClimbingEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     if (this.y > this.game.height - this.height - this.game.groundMargin)
       this.speedY *= -1;
     if (this.y < -this.height) this.markedForDeletion = true;
@@ -165,8 +228,9 @@ export class WormEnemy extends Enemy {
   constructor(game) {
     super();
     this.game = game;
-    this.spriteWidth = 80;
-    this.spriteHeight = 60;
+    // Share the high-resolution, consistently aligned six-frame worm sheet.
+    this.spriteWidth = 229;
+    this.spriteHeight = 171;
     this.width = 80;
     this.height = 60;
     this.x = this.game.width;
@@ -175,6 +239,8 @@ export class WormEnemy extends Enemy {
     this.speedY = 0;
     this.maxFrame = 5;
     this.image = document.getElementById("enemy_worm");
+    this.sourceFrameCount = 6;
+    this.frameInterval = 130;
   }
 }
 
@@ -214,6 +280,7 @@ export class Ghost4Enemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     this.y += Math.sin(this.angle) * this.curve;
     this.angle += 0.05;
   }
@@ -230,8 +297,8 @@ export class Ghost3Enemy extends Ghost4Enemy {
     super(game);
     this.image = document.getElementById("enemy_ghost_3");
     this.maxFrame = 5;
-    this.spriteWidth = 87;
-    this.spriteHeight = 70;
+    this.spriteWidth = 261;
+    this.spriteHeight = 209;
     this.width = 87;
     this.height = 70;
   }
@@ -268,6 +335,7 @@ export class Bat3Enemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     this.angle += this.va;
     this.y += Math.sin(this.angle) * 2.2;
   }
@@ -283,6 +351,7 @@ export class RavenEnemy extends Enemy {
     this.height = 68;
     this.x = this.game.width;
     this.y = Math.random() * this.game.height * 0.3 + this.game.height * 0.18;
+    this.homeY = this.y;
     this.speedX = Math.random() * 1.8 + 1.5;
     this.speedY = 0;
     this.maxFrame = 5;
@@ -291,8 +360,8 @@ export class RavenEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
-    this.angle += 0.07;
-    this.y += Math.sin(this.angle) * 1.6;
+    this.angle += deltaTime * 0.0014;
+    this.y = this.homeY + Math.sin(this.angle) * 7;
   }
 }
 
@@ -313,6 +382,7 @@ export class SpiderEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     if (this.y > this.game.height - this.height - this.game.groundMargin)
       this.speedY *= -1;
     if (this.y < -this.height) this.markedForDeletion = true;
@@ -344,7 +414,232 @@ export class SpinnerEnemy extends Enemy {
   }
   update(deltaTime) {
     super.update(deltaTime);
+    if (this.motionPattern) return;
     this.angle += 0.1;
     this.y += Math.sin(this.angle) * 2.5;
+  }
+}
+
+// ==================== LEVEL 3 HILLS (Frank enemies pack) ====================
+export class WaveEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 293;
+    this.spriteHeight = 155;
+    this.width = 90;
+    this.height = 48;
+    this.x = this.game.width + Math.random() * this.game.width * 0.3;
+    this.y = Math.random() * this.game.height * 0.4 + this.game.height * 0.15;
+    this.speedX = Math.random() * 1.5 + 1;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_wave");
+    this.angle = 0;
+    this.va = Math.random() * 0.1 + 0.08;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    this.angle += this.va;
+    this.y += Math.sin(this.angle) * 2;
+  }
+}
+
+export class BatFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 266;
+    this.spriteHeight = 188;
+    this.width = 85;
+    this.height = 60;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.12;
+    this.homeY = this.y;
+    this.speedX = Math.random() * 1.6 + 1.2;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_bat_3");
+    this.angle = 0;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    this.angle += 0.09;
+    this.y += Math.sin(this.angle) * 2.5;
+  }
+}
+
+export class HoverEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 218;
+    this.spriteHeight = 177;
+    this.width = 75;
+    this.height = 60;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.45 + this.game.height * 0.1;
+    this.speedX = Math.random() * 1.2 + 0.8;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_hover");
+    this.angle = 0;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    this.angle += 0.06;
+    this.y += Math.cos(this.angle) * 1.8;
+  }
+}
+
+export class SpinnerFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 213;
+    this.spriteHeight = 212;
+    this.width = 70;
+    this.height = 70;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.2;
+    this.speedX = Math.random() * 1.3 + 0.9;
+    this.speedY = 0;
+    this.maxFrame = 8;
+    this.image = document.getElementById("enemy_spinner");
+    this.angle = 0;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    this.angle += 0.12;
+    this.y += Math.sin(this.angle) * 2.2;
+  }
+}
+
+// ==================== LEVEL 4 MUSHROOM ====================
+export class GhostFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 261;
+    this.spriteHeight = 209;
+    this.width = 80;
+    this.height = 64;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.4 + this.game.height * 0.15;
+    this.speedX = Math.random() * 1.4 + 0.9;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_ghost_3");
+    this.angle = 0;
+    this.curve = Math.random() * 2 + 1;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    this.y += Math.sin(this.angle) * this.curve;
+    this.angle += 0.05;
+  }
+  draw(context) {
+    context.save();
+    context.globalAlpha = 0.8;
+    super.draw(context);
+    context.restore();
+  }
+}
+
+export class WormFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 229;
+    this.spriteHeight = 171;
+    this.width = 90;
+    this.height = 67;
+    this.x = this.game.width;
+    this.y = this.game.height - this.height - this.game.groundMargin;
+    this.speedX = Math.random() * 0.5 + 0.3;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_worm");
+    this.sourceFrameCount = 6;
+    this.frameInterval = 130;
+  }
+}
+
+export class SpiderFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 310;
+    this.spriteHeight = 175;
+    this.width = 100;
+    this.height = 56;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.5;
+    this.speedX = 0;
+    this.speedY = Math.random() > 0.5 ? 1.2 : -1.2;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_spider");
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    if (this.motionPattern) return;
+    if (this.y > this.game.height - this.height - this.game.groundMargin)
+      this.speedY *= -1;
+    if (this.y < -this.height) this.markedForDeletion = true;
+  }
+  draw(context) {
+    super.draw(context);
+    context.beginPath();
+    context.moveTo(this.x + this.width / 2, 0);
+    context.lineTo(this.x + this.width / 2, this.y + 10);
+    context.stroke();
+  }
+}
+
+// ==================== LEVEL 5 DESERT ====================
+export class RavenFrankEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.spriteWidth = 271;
+    this.spriteHeight = 194;
+    this.width = 90;
+    this.height = 65;
+    this.x = this.game.width;
+    this.y = Math.random() * this.game.height * 0.35 + this.game.height * 0.12;
+    this.homeY = this.y;
+    this.speedX = Math.random() * 2 + 1.5;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_raven");
+    this.angle = 0;
+  }
+  update(deltaTime) {
+    super.update(deltaTime);
+    this.angle += deltaTime * 0.0014;
+    this.y = this.homeY + Math.sin(this.angle) * 7;
+  }
+}
+
+export class RunnerEnemy extends Enemy {
+  constructor(game) {
+    super();
+    this.game = game;
+    // Share the canonical worm sprite sheet; keep this enemy's runner tuning.
+    this.spriteWidth = 229;
+    this.spriteHeight = 171;
+    this.width = 70;
+    this.height = 70;
+    this.x = this.game.width;
+    this.y = this.game.height - this.height - this.game.groundMargin;
+    this.speedX = Math.random() * 1.5 + 1;
+    this.speedY = 0;
+    this.maxFrame = 5;
+    this.image = document.getElementById("enemy_worm");
   }
 }

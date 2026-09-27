@@ -1,94 +1,77 @@
-# City & Forest Runner
+# Endless Runner
 
-<div align="center">
-  <img src="preview.png" width="1920" heigh="948" />
-</div>
+A browser-based 2D endless runner made with HTML5 Canvas and vanilla JavaScript. Choose a world, dodge or roll through enemies, and see how long you can survive as the pace and enemy patterns ramp up.
 
-A 2D side-scrolling endless runner built with pure HTML5 Canvas and vanilla JavaScript.
+![Endless Runner gameplay preview](preview.png)
 
-**Live Demo:** [Play here](https://souravbanerjeedata.github.io/endless-runner-game-in-js/)
+**Play:** [Open the game](https://souravbanerjeedata.github.io/endless-runner-game-in-js/)
 
----
+## Destinations
 
-## Features
+Choose from five scrolling worlds, each with layered parallax backgrounds and its own enemy mix:
 
-- Two levels: **City** and **Forest** with parallax backgrounds
-- Player states: sit, run, jump, fall, roll, dive, hit
-- Score by rolling or diving into enemies
-- Lives system with hit penalty
-- Floating score messages and boom collision effects
-- Particle effects (dust, fire, splash)
-- Full-screen responsive canvas
-- Start modal with rules and controls
-- Level transition modal after City victory
+- City
+- Forest
+- Hills
+- Mushroom Valley
+- Desert Run
 
----
+The game randomly selects one of two player appearances when a destination is chosen. Runs end in victory at 150 points, or in defeat if your score falls below zero or you lose all five lives. After the result, the game returns to the destination page.
 
-## How to Play
+## How to play
 
-| Control | Action |
+Avoid enemies, or use a roll or dive to defeat them. Defeating an enemy earns one point. Getting hit while not rolling or diving costs one point and one life.
+
+### Keyboard
+
+| Key | Action |
 | --- | --- |
-| ← → | Move left / right |
-| ↑ | Jump |
-| ↓ | Sit (on ground) / Dive (in air) |
-| Enter | Roll — destroy enemies for +1 score |
-| D | Toggle debug hitboxes |
+| `←` / `→` | Move left or right |
+| `↑` | Jump |
+| `↓` | Sit on the ground or dive in the air |
+| `Enter` | Roll while held |
+| Pause button | Pause or resume |
+| `D` | Toggle debug hitboxes |
 
-**Rules**
+## Device support
 
-- Roll or dive into enemies to score **+1**
-- Touching an enemy without rolling or diving costs **−5 score** and **1 life**
-- You start with **5 lives**
-- **Level 1 (City):** reach **40** points
-- **Level 2 (Forest):** reach **100** points
+This game is designed for desktop browsers and is **not playable on mobile devices**. When opened on a phone or tablet, it displays a notice asking the player to open the game on a desktop computer. Use a keyboard for gameplay.
 
----
+## Run locally
 
-## Run Locally
+The game uses JavaScript modules, so serve the project over HTTP rather than opening `index.html` directly from the file system.
 
-```bash
+```sh
 git clone https://github.com/Souravbanerjeedata/endless-runner-game-in-js.git
 cd endless-runner-game-in-js
-
-# Any static server works (ES modules need a server)
-npx serve .
-# or
-python -m http.server 8080
+python -m http.server 8000
 ```
 
-Open `http://localhost:3000` (or `8080`) in your browser.
+Then open [http://localhost:8000](http://localhost:8000). Any static web server can be used; there is no build step or package installation.
 
----
+## Project files
 
-## Project Structure
-
-```
-endless-runner-game-in-js/
-├── index.html
-├── style.css
-├── main.js              # Game loop, levels, enemy spawn
-├── player.js            # Player class & collision
-├── playerStates.js      # State machine (sit, run, jump, roll, …)
-├── enemies.js           # City & Forest enemies
-├── background.js        # Parallax layers
-├── particles.js         # Dust, fire, splash
-├── collisionAnimation.js
-├── floatingMessages.js
-├── input.js
-├── UI.js
-└── assets/              # Sprites & backgrounds
+```text
+index.html                 Game canvas, menus, and image assets
+style.css                  Layout and responsive styling
+main.js                    Game loop, destination selection, scoring, and spawning
+player.js                  Player rendering, animation, and collision handling
+playerStates.js            Player movement state machine
+enemies.js                 Enemy types and movement patterns
+background.js              Parallax background layers
+input.js                   Keyboard input
+UI.js                      Score, lives, pause, and result display
+particles.js               Particle effects
+collisionAnimation.js      Enemy collision effects
+floatingMessages.js        Floating score messages
+assets/                    Player, enemy, background, and effect artwork
+preview.png                Repository preview image
 ```
 
----
-
-## Tech Stack
+## Built with
 
 - HTML5 Canvas
-- Vanilla JavaScript (ES modules)
-- No frameworks or build tools
+- Vanilla JavaScript using ES modules
+- CSS
 
----
-
-## License
-
-MIT
+There are no frameworks, build tools, or runtime package dependencies.
