@@ -17,90 +17,90 @@ import {
   RavenEnemy,
   SpiderEnemy,
   SpinnerEnemy,
+  WaveEnemy,
+  BatFrankEnemy,
+  HoverEnemy,
+  SpinnerFrankEnemy,
+  GhostFrankEnemy,
+  WormFrankEnemy,
+  SpiderFrankEnemy,
+  RavenFrankEnemy,
+  RunnerEnemy,
 } from "./enemies.js";
 import { UI } from "./UI.js";
 
-window.addEventListener("load", () => {
+const ALL_ENEMY_TYPES = [
+  ClimbingEnemy, FlyingEnemy, GroundEnemy, DiggerEnemy, GroundZombieEnemy,
+  ZombieEnemy, WormEnemy, HandEnemy, Ghost4Enemy, Ghost3Enemy, Ghost2Enemy,
+  Bat3Enemy, RavenEnemy, SpiderEnemy, SpinnerEnemy, WaveEnemy, BatFrankEnemy,
+  HoverEnemy, SpinnerFrankEnemy, GhostFrankEnemy, WormFrankEnemy,
+  SpiderFrankEnemy, RavenFrankEnemy, RunnerEnemy,
+];
+const AIRBORNE_ENEMY_TYPES = new Set([
+  ClimbingEnemy, FlyingEnemy, Ghost4Enemy, Ghost3Enemy, Ghost2Enemy,
+  Bat3Enemy, RavenEnemy, SpiderEnemy, SpinnerEnemy, WaveEnemy, BatFrankEnemy,
+  HoverEnemy, SpinnerFrankEnemy, GhostFrankEnemy, SpiderFrankEnemy, RavenFrankEnemy,
+]);
+const FLYING_PATTERNS = ["float", "figure-eight", "swoop", "flutter", "drift"];
+const SPINNER_ENEMY_TYPES = new Set([SpinnerEnemy, SpinnerFrankEnemy]);
+const RAVEN_ENEMY_TYPES = new Set([RavenEnemy, RavenFrankEnemy]);
+const NATIVE_MOVEMENT_ENEMY_TYPES = new Set([
+  ClimbingEnemy, SpiderEnemy, SpiderFrankEnemy,
+]);
+const SPINNER_PATTERNS = ["float", "figure-eight", "orbit", "spiral", "swoop"];
+
+function initializeGame() {
   const canvas = document.getElementById("canvas1");
   const ctx = canvas.getContext("2d");
   const startModal = document.getElementById("startModal");
+  const destLanding = document.getElementById("destLanding");
   const btnStart = document.getElementById("btnStart");
-  const rotateOverlay = document.getElementById("rotateOverlay");
-  const endModal = document.getElementById("endModal");
-  const endTitle = document.getElementById("endTitle");
-  const endMessage = document.getElementById("endMessage");
-  const btnPlayAgain = document.getElementById("btnPlayAgain");
-  const btnQuitEnd = document.getElementById("btnQuitEnd");
-  const levelModal = document.getElementById("levelModal");
-  const btnContinue = document.getElementById("btnContinue");
-  const btnQuit = document.getElementById("btnQuit");
-  const fullscreenBtn = document.getElementById("fullscreenBtn");
+  const btnPause = document.getElementById("btnPause");
+  let game = null;
 
-  function isMobileDevice() {
-    return (
-      window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
-      navigator.maxTouchPoints > 0
-    );
-  }
-
-  function isPortrait() {
-    return window.innerHeight > window.innerWidth;
-  }
-
-  function updateOrientation() {
-    if (!rotateOverlay) return;
-    if (isPortrait()) {
-      rotateOverlay.classList.add("show");
-      if (game) game.orientationPaused = true;
-    } else {
-      rotateOverlay.classList.remove("show");
-      if (game) game.orientationPaused = false;
-    }
-  }
+  const DESTINATIONS = {
+    city: {
+      name: "City",
+      levelId: 1,
+      groundMargin: 0.16,
+      baseInterval: 1200,
+    },
+    forest: {
+      name: "Forest",
+      levelId: 2,
+      groundMargin: 0.08,
+      baseInterval: 1200,
+    },
+    hills: {
+      name: "Hills",
+      levelId: 3,
+      groundMargin: 0.06,
+      baseInterval: 1100,
+    },
+    mushroom: {
+      name: "Mushroom Valley",
+      levelId: 4,
+      groundMargin: 0.06,
+      baseInterval: 1100,
+    },
+    desert: {
+      name: "Desert Run",
+      levelId: 5,
+      groundMargin: 0.06,
+      baseInterval: 1000,
+    },
+  };
 
   function resizeCanvas() {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    canvas.width = viewportWidth;
-    canvas.height = viewportHeight;
-
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     if (game) {
-      // Mobile uses a logical game coordinate system and a render scale so
-      // every existing sprite/UI element keeps its proportions on different
-      // screen sizes. Physics and collision code remain unchanged.
-      if (isMobileDevice() && viewportWidth > viewportHeight) {
-        game.renderScale = Math.min(1.5, Math.max(0.65, viewportWidth / 1280));
-        game.width = viewportWidth / game.renderScale;
-        game.height = viewportHeight / game.renderScale;
-      } else {
-        game.renderScale = 1;
-        game.width = viewportWidth;
-        game.height = viewportHeight;
-      }
-
-      if (game.level === 1) {
-        game.groundMargin = Math.floor(game.height * 0.16);
-      } else {
-        game.groundMargin = Math.floor(game.height * 0.08);
-      }
-
-      if (game.background) {
-        game.background.height = game.height;
-        [...game.background.cityLayers, ...game.background.forestLayers].forEach(
-          (layer) => (layer.height = game.height),
-        );
-      }
-
-      if (game.player) {
-        const maxY = game.height - game.player.height - game.groundMargin;
-        if (game.player.y > maxY) game.player.y = maxY;
-      }
+      game.width = canvas.width;
+      game.height = canvas.height;
     }
-
-    updateOrientation();
-    updateFullscreenButton();
   }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
   class Game {
     constructor(width, height) {
@@ -119,68 +119,53 @@ window.addEventListener("load", () => {
       this.floatingMessages = [];
       this.maxparticles = 50;
       this.enemyTimer = 0;
-      this.enemyInterval = 1000;
+      this.enemyInterval = 1200;
+      this.baseEnemyInterval = 1200;
       this.debug = false;
       this.score = 0;
       this.fontColor = "black";
       this.time = 0;
-      this.maxTime = 90000;
+      this.maxTime = Infinity;
       this.gameOver = false;
+      this.victory = false;
+      this.terminalTimer = 0;
+      this.onGameComplete = null;
       this.lives = 5;
-
       this.level = 1;
-      this.level1Target = 40;
-      this.level2Target = 100;
+      this.destination = "city";
+      this.destinationName = "";
       this.paused = true;
+      this.started = false;
       this.waitingForLevelChoice = false;
-      this.orientationPaused = false;
-      this.renderScale = 1;
-
+      this.maxEnemiesOnScreen = 20;
+      this.maxGroupSize = 13;
+      this.enemyBag = [];
+      this.enemyBagTier = -1;
       this.player.currentState = this.player.states[0];
       this.player.currentState.enter();
     }
 
     update(deltaTime) {
-      if (this.paused || this.gameOver || this.orientationPaused) return;
+      if (this.gameOver) {
+        this.terminalTimer -= deltaTime;
+        if (this.terminalTimer <= 0 && this.onGameComplete) this.onGameComplete();
+        return;
+      }
+      if (this.paused || !this.started) return;
 
       this.time += deltaTime;
 
-      if (
-        this.level === 1 &&
-        this.score >= this.level1Target &&
-        !this.waitingForLevelChoice
-      ) {
-        this.paused = true;
-        this.waitingForLevelChoice = true;
-        this.speed = 0;
-        levelModal.classList.add("show");
-        return;
-      }
+      // Difficulty ramps with time: shorter spawn interval (floor 450ms)
+      const ramp = Math.min(1, this.time / 180000);
+      this.enemyInterval = Math.max(
+        450,
+        this.baseEnemyInterval - ramp * (this.baseEnemyInterval - 450),
+      );
+      if (this.time > 60000) this.maxSpeed = 5;
+      if (this.time > 120000) this.maxSpeed = 6;
 
-      if (this.level === 2 && this.score >= this.level2Target) {
-        this.paused = true;
-        this.speed = 0;
-        this.gameOver = true;
-        this.won = true;
-        showEndModal(true);
-        return;
-      }
-
-      if (this.lives <= 0) {
-        this.paused = true;
-        this.speed = 0;
-        this.gameOver = true;
-        this.won = false;
-        showEndModal(false);
-        return;
-      }
-
-      if (this.time > this.maxTime) {
-        this.paused = true;
-        this.speed = 0;
-        this.gameOver = true;
-        this.won = false;
-        showEndModal(false);
+      if (this.score < 0) {
+        this.finish(false);
         return;
       }
 
@@ -194,7 +179,11 @@ window.addEventListener("load", () => {
         this.enemyTimer += deltaTime;
       }
 
-      this.enemies.forEach((enemy) => enemy.update(deltaTime));
+      this.enemies.forEach((enemy) => {
+        enemy.preparePatternUpdate();
+        enemy.update(deltaTime);
+        enemy.applyPattern(deltaTime);
+      });
       this.particles.forEach((particle) => particle.update());
       this.collisions.forEach((c) => c.update(deltaTime));
       this.floatingMessages.forEach((m) => m.update());
@@ -209,6 +198,12 @@ window.addEventListener("load", () => {
       this.floatingMessages = this.floatingMessages.filter(
         (m) => !m.markedForDeletion,
       );
+      if (this.score >= 150) {
+        this.score = 150;
+        this.finish(true);
+      } else if (this.lives <= 0) {
+        this.finish(false);
+      }
     }
 
     draw(context) {
@@ -221,278 +216,245 @@ window.addEventListener("load", () => {
       this.UI.draw(context);
     }
 
-    startLevel2() {
-      this.level = 2;
-      this.background.setLevel(2);
-      this.groundMargin = Math.floor(this.height * 0.08);
+    setDestination(key) {
+      const cfg = DESTINATIONS[key];
+      if (!cfg) return;
+      this.destination = key;
+      this.destinationName = cfg.name;
+      this.level = cfg.levelId;
+      this.background.setLevel(cfg.levelId);
+      this.groundMargin = Math.floor(this.height * cfg.groundMargin);
+      this.baseEnemyInterval = cfg.baseInterval;
+      this.enemyInterval = cfg.baseInterval;
       this.enemies = [];
       this.particles = [];
       this.collisions = [];
+      this.floatingMessages = [];
       this.score = 0;
       this.time = 0;
-      this.enemyInterval = 1100;
-      this.paused = false;
-      this.waitingForLevelChoice = false;
+      this.lives = 5;
+      this.gameOver = false;
+      this.maxSpeed = 4;
+      this.enemyTimer = 0;
+      this.enemyBag = [];
+      this.enemyBagTier = -1;
+      this.victory = false;
+      this.started = false;
+      this.paused = true;
+      this.time = 0;
+      if (this.player && typeof this.player.useWhiteDog === "function") {
+        this.player.useWhiteDog(Math.random() < 0.5);
+      }
       this.player.x = 50;
       this.player.y = this.height - this.player.height - this.groundMargin;
       this.player.vy = 0;
       this.player.setState(1, 1);
-      levelModal.classList.remove("show");
+    }
+
+    beginPlay() {
+      this.time = 0;
+      this.score = 0;
+      this.enemyTimer = 0;
+      this.paused = false;
+      this.started = true;
+      this.player.setState(1, 1);
+    }
+
+    finish(victory) {
+      if (this.gameOver) return;
+      this.gameOver = true;
+      this.victory = victory;
+      this.paused = true;
+      this.terminalTimer = 3000;
+      this.input.keys.length = 0;
+      if (btnPause) btnPause.classList.remove("show");
+      if (canvas) canvas.classList.remove("interactive");
     }
 
     addEnemy() {
       if (this.speed <= 0) return;
-
-      if (this.level === 1) {
-        if (Math.random() < 0.5) this.enemies.push(new GroundEnemy(this));
-        else this.enemies.push(new ClimbingEnemy(this));
-        this.enemies.push(new FlyingEnemy(this));
-      } else {
-        const groundTypes = [
-          DiggerEnemy,
-          GroundZombieEnemy,
-          ZombieEnemy,
-          WormEnemy,
-          HandEnemy,
-        ];
-        const flyingTypes = [
-          Ghost4Enemy,
-          Ghost3Enemy,
-          Ghost2Enemy,
-          Bat3Enemy,
-          RavenEnemy,
-          SpiderEnemy,
-          SpinnerEnemy,
-        ];
-
-        const r = Math.random();
-        if (r < 0.18) {
-          const n = 2 + Math.floor(Math.random() * 5);
-          for (let i = 0; i < n; i++) this.enemies.push(new ZombieEnemy(this));
-        } else if (r < 0.32) {
-          const n = 2 + Math.floor(Math.random() * 5);
-          for (let i = 0; i < n; i++) this.enemies.push(new SpinnerEnemy(this));
-        } else if (r < 0.55) {
-          const GroundClass =
-            groundTypes[Math.floor(Math.random() * groundTypes.length)];
-          this.enemies.push(new GroundClass(this));
-        } else {
-          const FlyingClass =
-            flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
-          this.enemies.push(new FlyingClass(this));
+      if (this.enemies.length >= this.maxEnemiesOnScreen) return;
+      const pools = {
+        1: [GroundEnemy, ClimbingEnemy, FlyingEnemy, Bat3Enemy, SpinnerEnemy],
+        2: [DiggerEnemy, GroundZombieEnemy, ZombieEnemy, WormEnemy, HandEnemy, Ghost4Enemy, Ghost3Enemy, Ghost2Enemy, Bat3Enemy, RavenEnemy, SpiderEnemy, SpinnerEnemy],
+        3: [GroundEnemy, GroundZombieEnemy, DiggerEnemy, WormFrankEnemy, RunnerEnemy, WaveEnemy, BatFrankEnemy, HoverEnemy, SpinnerFrankEnemy],
+        4: [WormFrankEnemy, RunnerEnemy, GroundZombieEnemy, DiggerEnemy, HandEnemy, GhostFrankEnemy, SpiderFrankEnemy, BatFrankEnemy, Ghost2Enemy, Ghost3Enemy, SpinnerFrankEnemy],
+        5: [WormFrankEnemy, RunnerEnemy, GroundZombieEnemy, DiggerEnemy, RavenFrankEnemy, SpinnerFrankEnemy, HoverEnemy, WaveEnemy, BatFrankEnemy],
+      };
+      const localTypes = pools[this.level] || pools[1];
+      // Bring in the full cast gradually, then cycle every available sprite
+      // before repeating one so all enemies appear during a longer run.
+      const tier = this.time < 20000 ? 0 : this.time < 50000 ? 1 : 2;
+      let types = localTypes;
+      if (tier === 1) {
+        types = [...new Set([...localTypes, ...ALL_ENEMY_TYPES.slice(0, 15)])];
+      } else if (tier === 2) {
+        types = ALL_ENEMY_TYPES;
+      }
+      if (this.enemyBagTier !== tier || this.enemyBag.length === 0) {
+        this.enemyBag = [...types];
+        for (let i = this.enemyBag.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.enemyBag[i], this.enemyBag[j]] = [this.enemyBag[j], this.enemyBag[i]];
         }
-        if (Math.random() < 0.45) {
-          const FlyingClass =
-            flyingTypes[Math.floor(Math.random() * flyingTypes.length)];
-          this.enemies.push(new FlyingClass(this));
+        this.enemyBagTier = tier;
+      }
+      const room = this.maxEnemiesOnScreen - this.enemies.length;
+      const ramp = Math.min(1, this.time / 90000);
+      const Type = this.enemyBag.pop();
+      const isAirborne = AIRBORNE_ENEMY_TYPES.has(Type);
+      const isSpinner = SPINNER_ENEMY_TYPES.has(Type);
+      const usesDirectorPattern = isAirborne &&
+        !RAVEN_ENEMY_TYPES.has(Type) &&
+        !NATIVE_MOVEMENT_ENEMY_TYPES.has(Type);
+      const regularGroupSize = Math.min(
+        6,
+        1 + Math.floor(this.time / 15000),
+        1 + Math.floor(ramp * 5),
+      );
+      const spinnerGroupSize = Math.min(
+        13,
+        6 + Math.floor(Math.max(0, this.time - 30000) / 12000),
+      );
+      const batchSize = Math.min(room, isSpinner ? spinnerGroupSize : regularGroupSize);
+      const spinnerPatternTier = Math.min(
+        SPINNER_PATTERNS.length,
+        1 + Math.floor(this.time / 30000),
+      );
+      const groupPattern = isSpinner
+        ? SPINNER_PATTERNS[Math.floor(Math.random() * spinnerPatternTier)]
+        : usesDirectorPattern && this.time >= 12000
+          ? FLYING_PATTERNS[Math.floor(Math.random() * FLYING_PATTERNS.length)]
+          : null;
+      const groupPhase = Math.random() * Math.PI * 2;
+      const groupY = this.height * (0.22 + Math.random() * 0.2);
+      for (let i = 0; i < batchSize; i++) {
+        const enemy = new Type(this);
+        // Families fly in a compact, readable formation instead of a long queue.
+        enemy.x = this.width + i * (isAirborne ? 78 : 105) + Math.random() * 24;
+        if (isAirborne) {
+          const formationOffset = (i - (batchSize - 1) / 2) * (14 + ramp * 12);
+          enemy.y = Math.min(
+            this.height - enemy.height - this.groundMargin - 20,
+            Math.max(24, groupY + formationOffset),
+          );
+          if (RAVEN_ENEMY_TYPES.has(Type)) enemy.homeY = enemy.y;
+          if (usesDirectorPattern) enemy.motionPattern = groupPattern || "float";
+          enemy.patternAge = 0;
+          enemy.patternPhase = groupPhase + i * 0.32;
+          enemy.patternAmplitude = 12 + ramp * 28;
+          enemy.patternLateral = groupPattern === "figure-eight" || groupPattern === "swoop"
+            ? 10 + ramp * 20
+            : 4 + ramp * 10;
+          enemy.patternFrequency = 1.2 + ramp * 1.3;
+          enemy.patternOffsetX = 0;
+          enemy.patternOffsetY = 0;
         }
+        this.enemies.push(enemy);
       }
     }
   }
 
-  let game = null;
-
-  function isFullscreen() {
-    return Boolean(
-      document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.msFullscreenElement,
-    );
-  }
-
-  function updateFullscreenButton() {
-    if (!fullscreenBtn) return;
-    const mobile = isMobileDevice();
-    fullscreenBtn.hidden = !mobile;
-    fullscreenBtn.setAttribute(
-      "aria-label",
-      isFullscreen() ? "Exit fullscreen" : "Enter fullscreen",
-    );
-    fullscreenBtn.title = isFullscreen() ? "Exit fullscreen" : "Fullscreen";
-    fullscreenBtn.innerHTML = isFullscreen()
-      ? '<span aria-hidden="true">⛶</span>'
-      : '<span aria-hidden="true">⛶</span>';
-    fullscreenBtn.classList.toggle("is-fullscreen", isFullscreen());
-  }
-
-  async function toggleFullscreen() {
-    try {
-      if (isFullscreen()) {
-        if (document.exitFullscreen) await document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        return;
-      }
-
-      const root = document.documentElement;
-      if (root.requestFullscreen) {
-        await root.requestFullscreen({ navigationUI: "hide" });
-      } else if (root.webkitRequestFullscreen) {
-        root.webkitRequestFullscreen();
-      } else {
-        // iOS Safari does not expose generic element fullscreen. The game
-        // remains usable there through the browser/PWA display mode.
-        updateFullscreenButton();
-        return;
-      }
-
-      if (screen.orientation?.lock) {
-        try {
-          await screen.orientation.lock("landscape");
-        } catch (_) {
-          // Orientation locking is optional and browser-dependent.
-        }
-      }
-    } catch (error) {
-      console.warn("Fullscreen request was blocked by the browser:", error);
-    } finally {
-      updateFullscreenButton();
-      setTimeout(resizeCanvas, 100);
-    }
-  }
-
-  if (fullscreenBtn) {
-    fullscreenBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleFullscreen();
-    });
-  }
-
-  document.addEventListener("fullscreenchange", () => {
-    updateFullscreenButton();
-    resizeCanvas();
-  });
-  document.addEventListener("webkitfullscreenchange", () => {
-    updateFullscreenButton();
-    resizeCanvas();
-  });
-
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
-  window.addEventListener("orientationchange", () => {
-    setTimeout(resizeCanvas, 150);
-  });
-
-  game = new Game(canvas.width, canvas.height);
-  resizeCanvas();
-  game.orientationPaused = isPortrait();
-  updateOrientation();
   let lastTime = 0;
+  let selectedDestination = null;
 
-  function startGame() {
-    if (!startModal.classList.contains("show")) return;
-    startModal.classList.remove("show");
-    game.paused = false;
-    game.time = 0;
-    game.player.setState(1, 1);
+  try {
+    game = new Game(canvas.width, canvas.height);
+    game.onGameComplete = () => {
+      selectedDestination = null;
+      game.started = false;
+      game.paused = true;
+      game.gameOver = false;
+      game.victory = false;
+      game.enemies = [];
+      if (startModal) startModal.classList.remove("show");
+      if (destLanding) destLanding.classList.remove("hidden");
+      if (destLanding) destLanding.scrollTop = 0;
+      if (btnPause) btnPause.classList.remove("show");
+      if (canvas) canvas.classList.remove("interactive");
+      window.scrollTo(0, 0);
+    };
+  } catch (err) {
+    console.error("Game init error:", err);
+    alert("Game failed to load: " + err.message);
   }
 
-  if (btnStart) {
-    btnStart.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      startGame();
-    });
-  }
-
-  
-  let endModalShown = false;
-
-  function quitGame() {
-    levelModal.classList.remove("show");
-    if (endModal) endModal.classList.remove("show");
-    if (startModal) startModal.classList.remove("show");
-    game.gameOver = true;
-    game.paused = true;
-    game.speed = 0;
-    try {
-      window.close();
-    } catch (e) {}
-    // Fallback if browser blocks window.close()
-    document.body.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a12;color:#eee;font-family:Creepster,cursive;flex-direction:column;gap:12px;text-align:center;padding:20px">' +
-      "<h1 style=\"color:#e94560;font-size:2.5rem\">Thanks for playing!</h1>" +
-      "<p>You can close this tab now.</p>" +
-      "</div>";
-  }
-
-  function showEndModal(won) {
-    if (!endModal) return;
-    if (won) {
-      endTitle.textContent = "Victory!";
-      endMessage.textContent = "You cleared the forest! Great run.";
-    } else {
-      endTitle.textContent = "Game Over";
-      endMessage.textContent = "Better luck next time!";
+  function onDestinationPick(key) {
+    if (!key) return;
+    selectedDestination = key;
+    if (game) {
+      try {
+        game.setDestination(key);
+      } catch (err) {
+        console.error("setDestination error:", err);
+        alert("Could not load destination: " + err.message);
+        return;
+      }
     }
-    endModal.classList.add("show");
+    if (destLanding) destLanding.classList.add("hidden");
+    if (startModal) startModal.classList.add("show");
   }
 
-  function playAgain() {
-    endModalShown = false;
-    endModal.classList.remove("show");
-    levelModal.classList.remove("show");
-    game.level = 1;
-    game.background.setLevel(1);
-    game.groundMargin = Math.floor(game.height * 0.16);
-    game.enemies = [];
-    game.particles = [];
-    game.collisions = [];
-    game.floatingMessages = [];
-    game.score = 0;
-    game.time = 0;
-    game.lives = 5;
-    game.enemyInterval = 1000;
-    game.gameOver = false;
-    game.paused = false;
-    game.won = false;
-    game.waitingForLevelChoice = false;
-    game.speed = 0;
-    game.player.x = 0;
-    game.player.y = game.height - game.player.height - game.groundMargin;
-    game.player.vy = 0;
-    game.player.setState(1, 1);
-    lastTime = performance.now();
-    requestAnimationFrame(animate);
+  function onOkay() {
+    if (!selectedDestination) {
+      if (startModal) startModal.classList.remove("show");
+      if (destLanding) destLanding.classList.remove("hidden");
+      return;
+    }
+    if (startModal) startModal.classList.remove("show");
+    if (game) {
+      game.beginPlay();
+      if (canvas) canvas.classList.add("interactive");
+    }
+    if (btnPause) {
+      btnPause.classList.add("show");
+      updatePauseButton();
+    }
   }
 
+  function updatePauseButton() {
+    if (!btnPause) return;
+    const isPaused = game && game.paused;
+    btnPause.textContent = isPaused ? "▶" : "⏸";
+    btnPause.setAttribute("aria-label", isPaused ? "Resume" : "Pause");
+    btnPause.title = isPaused ? "Resume" : "Pause";
+  }
 
-  bindTap(btnContinue, () => game.startLevel2());
+  window.__pickDest = onDestinationPick;
+  window.__onOkay = onOkay;
 
-  function bindTap(el, fn) {
-    if (!el) return;
-    el.addEventListener("click", (e) => {
+  // Event delegation — works even if buttons are re-rendered
+  document.addEventListener("click", (e) => {
+    const destBtn = e.target.closest("[data-destination]");
+    if (destBtn) {
       e.preventDefault();
-      e.stopPropagation();
-      fn();
-    });
-  }
+      onDestinationPick(destBtn.getAttribute("data-destination"));
+      return;
+    }
+    if (e.target.closest("#btnStart")) {
+      e.preventDefault();
+      onOkay();
+      return;
+    }
+    if (e.target.closest("#btnPause")) {
+      e.preventDefault();
+      if (!game || game.gameOver || !game.started) return;
+      game.paused = !game.paused;
+      updatePauseButton();
+    }
+  });
 
-  bindTap(btnQuit, quitGame);
-  bindTap(btnQuitEnd, quitGame);
-  bindTap(btnPlayAgain, playAgain);
-
-    function animate(timeStamp) {
+  function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
     lastTime = timeStamp;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.update(deltaTime);
-
-    ctx.save();
-    if (game.renderScale !== 1) {
-      ctx.scale(game.renderScale, game.renderScale);
-    }
-    game.draw(ctx);
-    ctx.restore();
-    if (game.gameOver && !endModalShown && game.level === 2) {
-      endModalShown = true;
-      showEndModal(!!game.won);
-    } else if (game.gameOver && !endModalShown && game.lives <= 0) {
-      endModalShown = true;
-      showEndModal(false);
+    if (game) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      game.update(deltaTime);
+      game.draw(ctx);
     }
     requestAnimationFrame(animate);
   }
   animate(0);
-});
+}
+
+initializeGame();

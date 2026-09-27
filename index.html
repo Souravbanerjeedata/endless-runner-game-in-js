@@ -2,40 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>Endless Runner - City & Forest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Endless Runner</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Creepster&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <canvas id="canvas1"></canvas>
 
-    <button
-      type="button"
-      id="fullscreenBtn"
-      class="fullscreen-btn"
-      aria-label="Enter fullscreen"
-      title="Fullscreen"
-    >
-      <span aria-hidden="true">⛶</span>
-    </button>
+    <button type="button" id="btnPause" class="pause-btn" aria-label="Pause" title="Pause"><span aria-hidden="true">⏸</span></button>
 
-    <div id="startModal" class="modal show">
+    <main id="destLanding" class="destination-landing">
+      <section class="destination-shell" aria-labelledby="destinationTitle">
+        <p class="destination-eyebrow">ENDLESS RUNNER</p>
+        <h1 id="destinationTitle">Choose your world</h1>
+        <p class="destination-intro">Pick a destination and get ready to run.</p>
+        <div class="dest-grid">
+          <button type="button" class="dest-btn" data-destination="city">
+            <span class="dest-preview" role="img" aria-label="City skyline preview">
+              <img src="assets/layer-1.png" alt="" /><img src="assets/layer-2.png" alt="" /><img src="assets/layer-3.png" alt="" /><img src="assets/layer-4.png" alt="" /><img src="assets/layer-5.png" alt="" />
+            </span>
+            <span class="dest-name">City</span>
+          </button>
+          <button type="button" class="dest-btn" data-destination="forest">
+            <span class="dest-preview" role="img" aria-label="Forest preview">
+              <img src="assets/forest-layer-1.png" alt="" /><img src="assets/forest-layer-2.png" alt="" /><img src="assets/forest-layer-3.png" alt="" /><img src="assets/forest-layer-4.png" alt="" /><img src="assets/forest-layer-5.png" alt="" />
+            </span>
+            <span class="dest-name">Forest</span>
+          </button>
+          <button type="button" class="dest-btn" data-destination="hills">
+            <span class="dest-preview" role="img" aria-label="Hills preview">
+              <img src="assets/hills-layer-1.svg" alt="" /><img src="assets/hills-layer-2.svg" alt="" /><img src="assets/hills-layer-3.svg" alt="" /><img src="assets/hills-layer-4.svg" alt="" /><img src="assets/hills-layer-5.svg" alt="" />
+            </span>
+            <span class="dest-name">Hills</span>
+          </button>
+          <button type="button" class="dest-btn" data-destination="mushroom">
+            <span class="dest-preview" role="img" aria-label="Mushroom Valley preview">
+              <img src="assets/mushroom-layer-1.svg" alt="" /><img src="assets/mushroom-layer-2.svg" alt="" /><img src="assets/mushroom-layer-3.svg" alt="" /><img src="assets/mushroom-layer-4.svg" alt="" /><img src="assets/mushroom-layer-5.svg" alt="" />
+            </span>
+            <span class="dest-name">Mushroom Valley</span>
+          </button>
+          <button type="button" class="dest-btn" data-destination="desert">
+            <span class="dest-preview" role="img" aria-label="Desert Run preview">
+              <img src="assets/desert-layer-1.svg" alt="" /><img src="assets/desert-layer-2.svg" alt="" /><img src="assets/desert-layer-3.svg" alt="" /><img src="assets/desert-layer-4.svg" alt="" /><img src="assets/desert-layer-5.svg" alt="" />
+            </span>
+            <span class="dest-name">Desert Run</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- STEP 2: Instructions (after destination) -->
+    <div id="startModal" class="modal">
       <div class="modal-content start-modal-content">
-        <h1>City & Forest Runner</h1>
+        <h1>How to Play</h1>
         <div class="rules">
           <p><strong>Goal</strong></p>
-          <p>Reach the score target before time runs out. Level 1: 40 points. Level 2: 100 points.</p>
+          <p>Roll into enemies to score. Reach 150 points for victory; the run also ends if your score goes below 0 or you lose all 5 lives.</p>
           <div class="controls-desktop">
             <p><strong>Controls</strong></p>
             <p>← → Move left / right</p>
@@ -48,10 +73,12 @@
             <p>Hold left / right side of screen to move</p>
             <p>Swipe up to jump</p>
             <p>Swipe down to sit / dive</p>
-            <p>Double-tap to roll · Double-tap again to stop rolling</p>
+            <p>Double-tap to roll · Double-tap again to stop</p>
           </div>
           <p><strong>Rules</strong></p>
-          <p>Roll or dive into enemies to score. Touching them without rolling costs 5 score and 1 life. You have 5 lives.</p>
+          <p>Roll or dive into enemies: <strong>+1</strong> score.</p>
+          <p>Hit while not rolling: <strong>−1</strong> score and lose a life.</p>
+          <p>Difficulty increases the longer you play. No time limit.</p>
         </div>
         <div class="modal-buttons">
           <button type="button" id="btnStart">Okay</button>
@@ -59,40 +86,8 @@
       </div>
     </div>
 
-    
-    <div id="endModal" class="modal">
-      <div class="modal-content">
-        <h1 id="endTitle">Victory!</h1>
-        <p id="endMessage">You cleared the forest!</p>
-        <div class="modal-buttons">
-          <button type="button" id="btnPlayAgain">Play Again</button>
-          <button type="button" id="btnQuitEnd">Quit</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="levelModal" class="modal">
-      <div class="modal-content">
-        <h1>Level 1 Complete!</h1>
-        <p>Victory! The city is clear.</p>
-        <p>Ready for the Forest?</p>
-        <div class="modal-buttons">
-          <button type="button" id="btnContinue">Continue to Level 2</button>
-          <button type="button" id="btnQuit">Quit</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="rotateOverlay" class="rotate-overlay">
-      <div class="rotate-content">
-        <div class="rotate-icon">📱</div>
-        <p>Please rotate your device</p>
-        <p class="rotate-sub">Landscape mode required to play</p>
-        <p class="rotate-sub rotate-fullscreen-hint">Tap ⛶ for fullscreen and landscape when supported.</p>
-      </div>
-    </div>
-
     <img src="assets/player.png" id="player" />
+    <img src="assets/player_white.png" id="player_white" />
     <img src="assets/layer-1.png" id="layer1" />
     <img src="assets/layer-2.png" id="layer2" />
     <img src="assets/layer-3.png" id="layer3" />
@@ -103,6 +98,21 @@
     <img src="assets/forest-layer-3.png" id="forest-layer3" />
     <img src="assets/forest-layer-4.png" id="forest-layer4" />
     <img src="assets/forest-layer-5.png" id="forest-layer5" />
+    <img src="assets/hills-layer-1.svg" id="hills-layer1" />
+    <img src="assets/hills-layer-2.svg" id="hills-layer2" />
+    <img src="assets/hills-layer-3.svg" id="hills-layer3" />
+    <img src="assets/hills-layer-4.svg" id="hills-layer4" />
+    <img src="assets/hills-layer-5.svg" id="hills-layer5" />
+    <img src="assets/mushroom-layer-1.svg" id="mushroom-layer1" />
+    <img src="assets/mushroom-layer-2.svg" id="mushroom-layer2" />
+    <img src="assets/mushroom-layer-3.svg" id="mushroom-layer3" />
+    <img src="assets/mushroom-layer-4.svg" id="mushroom-layer4" />
+    <img src="assets/mushroom-layer-5.svg" id="mushroom-layer5" />
+    <img src="assets/desert-layer-1.svg" id="desert-layer1" />
+    <img src="assets/desert-layer-2.svg" id="desert-layer2" />
+    <img src="assets/desert-layer-3.svg" id="desert-layer3" />
+    <img src="assets/desert-layer-4.svg" id="desert-layer4" />
+    <img src="assets/desert-layer-5.svg" id="desert-layer5" />
     <img src="assets/enemy_fly.png" id="enemy_fly" />
     <img src="assets/enemy_plant.png" id="enemy_plant" />
     <img src="assets/enemy_spider_big.png" id="enemy_spider_big" />
@@ -118,6 +128,8 @@
     <img src="assets/enemy_raven.png" id="enemy_raven" />
     <img src="assets/enemy_spider.png" id="enemy_spider" />
     <img src="assets/enemy_spinner.png" id="enemy_spinner" />
+    <img src="assets/enemy_wave.png" id="enemy_wave" />
+    <img src="assets/enemy_hover.png" id="enemy_hover" />
     <img src="assets/fire.png" id="fire" />
     <img src="assets/boom.png" id="collisionAnimation" />
     <img src="assets/heart.png" id="lives" />
